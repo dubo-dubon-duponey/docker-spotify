@@ -53,7 +53,7 @@ USER          dubo-dubon-duponey
 
 
 COPY          --from=builder /build/librespot/target/release/librespot ./bin/librespot
-COPY          --from=healthcheck-builder /dist/bin/rtsp-health ./bin/
+COPY          --from=builder-healthcheck /dist/bin/rtsp-health ./bin/
 
 ENV           NAME=Sproutify
 ENV           PORT=4000

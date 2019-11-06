@@ -22,11 +22,12 @@ WORKDIR       /build
 
 ARG           LIBRESPOT_VER=cbba63f60baef6c812a82903a0e0735688056d3c
 
-RUN           git clone git://librespot-org/librespot
+RUN           git clone git://github.com/librespot-org/librespot
 RUN           git -C librespot      checkout $LIBRESPOT_VER
 
 RUN           apt-get install -qq --no-install-recommends \
-                libasound2-dev=1.1.8-1
+                libasound2-dev=1.1.8-1 \
+                cargo=0.35.0-2
 
 WORKDIR       /build/librespot
 RUN           cargo build --release

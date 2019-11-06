@@ -9,7 +9,7 @@ WORKDIR       $GOPATH/src/github.com/dubo-dubon-duponey/healthcheckers
 RUN           git clone git://github.com/dubo-dubon-duponey/healthcheckers .
 RUN           git checkout $HEALTH_VER
 RUN           arch="${TARGETPLATFORM#*/}"; \
-              env GOOS=linux GOARCH="${arch%/*}" go build -v -ldflags "-s -w" -o /dist/bin/rtsp-health ./cmd/rtsp
+              env GOOS=linux GOARCH="${arch%/*}" go build -v -ldflags "-s -w" -o /dist/bin/http-health ./cmd/http
 
 RUN           chmod 555 /dist/bin/*
 
@@ -54,13 +54,12 @@ USER          dubo-dubon-duponey
 
 
 COPY          --from=builder /build/librespot/target/release/librespot ./bin/librespot
-COPY          --from=builder-healthcheck /dist/bin/rtsp-health ./bin/
+COPY          --from=builder-healthcheck /dist/bin/http-health ./bin/
 
 ENV           NAME=Sproutify
-ENV           PORT=4000
-ENV           HEALTHCHECK_URL=rtsp://127.0.0.1:5000
+ENV           PORT=10042
+ENV           HEALTHCHECK_URL="http://127.0.0.1:$PORT/?action=getInfo"
 
-#EXPOSE        5000/tcp
-#EXPOSE        6001-6011/udp
+EXPOSE        $PORT/tcp
 
-# HEALTHCHECK --interval=30s --timeout=30s --start-period=10s --retries=1 CMD rtsp-health || exit 1
+HEALTHCHECK   --interval=30s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1

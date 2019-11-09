@@ -62,4 +62,7 @@ ENV           HEALTHCHECK_URL="http://127.0.0.1:$PORT/?action=getInfo"
 
 EXPOSE        $PORT/tcp
 
+VOLUME        /data
+VOLUME        /tmp
+
 HEALTHCHECK   --interval=30s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1

@@ -27,7 +27,7 @@ This is useful in the following scenarios:
  * observable
     * [x] healthcheck
     * [x] log to stdout
-    * [ ] [KO] prometheus endpoint
+    * [ ] ~~prometheus endpoint~~
 
 ## Run
 

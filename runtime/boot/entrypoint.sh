@@ -10,6 +10,11 @@ PORT=${PORT:-10042}
   exit 1
 }
 
+[ -w "/tmp" ] || {
+  >&2 printf "/tmp is not writable. Check your mount permissions.\n"
+  exit 1
+}
+
 exec librespot --cache /data/cache --name "$NAME" --bitrate 320 --device-type speaker --zeroconf-port "$PORT" "$@"
 
 # --avr

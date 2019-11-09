@@ -6,7 +6,7 @@ This is based on [LibreSpot](https://github.com/librespot-org/librespot).
 
 This is useful in the following scenarios:
 
- 1. you are a hobbyist and you want to turn a small appliance connected to speakers (eg: a raspberry pi, typically) into a Spotify Connect receiver
+ 1. you are a hobbyist and you want to turn a small appliance connected to speakers into a Spotify Connect receiver (typically a raspberry pi) 
  1. that's it :-)
 
 ## Image features
@@ -23,26 +23,13 @@ This is useful in the following scenarios:
  * lightweight
     * [x] based on `debian:buster-slim`
     * [x] simple entrypoint script
-    * [ ] multi-stage build with ~~no~~ one installed dependencies (`libasound`) for the runtime image
+    * [x] multi-stage build with no installed dependencies for the runtime image
  * observable
     * [x] healthcheck
     * [x] log to stdout
     * [ ] [KO] prometheus endpoint
 
 ## Run
-
-First off, librespot [requires ipv6](https://github.com/librespot-org/librespot/issues/292#issuecomment-552058573).
-
-To enable it for the Docker daemon, edit /etc/docker/daemon.json:
-
-```
-{
-        "ipv6": true,
-        "fixed-cidr-v6": "2001:db8:1::/64"
-}
-```
-
-Restart the docker daemon now (usually `systemctl restart docker`).
 
 The following is the most straight-forward example, using host networking:
 
@@ -62,8 +49,7 @@ docker run -d \
 
 ### Networking
 
-Besides the requirement to have ipv6 enabled, and since the Spotify Connect protocol uses bonjour for discovery, 
-you have to use host networking, or alternatively mac-(or ip)-vlan.
+Since the Spotify Connect protocol uses bonjour for discovery, you have to use host networking, or alternatively mac-(or ip)-vlan.
 
 ### Configuration reference
 
@@ -77,7 +63,7 @@ You can also tweak the following for control over which internal ports are being
 
  * PORT (eg: `10042`) controls the port used by the http command endpoint
 
-Of course using any privileged port for that would require CAP_NET_BIND_SERVICE and a root user.
+Of course using any privileged port for that would require CAP_NET_BIND_SERVICE and a `--user=root` (not recommended...).
 
 Finally, any additional arguments provided when running the image will get fed to the `librespot` binary.
 
@@ -112,4 +98,4 @@ You can rebuild the image using the following build arguments:
 
  * BUILD_UID
  
-So to control which user-id to assign to the in-container user.
+So to control which user-id to assign to the in-container user (default is 2000).

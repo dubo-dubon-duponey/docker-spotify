@@ -9,9 +9,7 @@ WORKDIR       $GOPATH/src/github.com/dubo-dubon-duponey/healthcheckers
 RUN           git clone git://github.com/dubo-dubon-duponey/healthcheckers .
 RUN           git checkout $HEALTH_VER
 RUN           arch="${TARGETPLATFORM#*/}"; \
-              env GOOS=linux GOARCH="${arch%/*}" go build -v -ldflags "-s -w" -o /dist/bin/http-health ./cmd/http
-
-RUN           chmod 555 /dist/bin/*
+              env GOOS=linux GOARCH="${arch%/*}" go build -v -ldflags "-s -w" -o /dist/boot/bin/http-health ./cmd/http
 
 #######################
 # Building image
@@ -20,41 +18,34 @@ FROM          dubodubonduponey/base:builder                                   AS
 
 WORKDIR       /build
 
-ARG           LIBRESPOT_VER=cbba63f60baef6c812a82903a0e0735688056d3c
-
-RUN           git clone git://github.com/librespot-org/librespot
-RUN           git -C librespot      checkout $LIBRESPOT_VER
-
+# Maybe consider https://github.com/japaric/rust-cross for cross-compilation
 RUN           apt-get install -qq --no-install-recommends \
                 libasound2-dev=1.1.8-1 \
                 cargo=0.35.0-2
 
+# v0.1.0
+ARG           LIBRESPOT_VER=295bda7e489715b9e6c27a262f9a4fcd12fb7632
+
+RUN           git clone git://github.com/librespot-org/librespot
+RUN           git -C librespot      checkout $LIBRESPOT_VER
+
 WORKDIR       /build/librespot
-RUN           cargo build --release
+RUN           cargo build -Z unstable-options --release --out-dir /dist/boot/bin --no-default-features --features alsa-backend
+
+COPY          --from=builder-healthcheck /dist/boot/bin           /dist/boot/bin
+
+RUN           rm /dist/boot/bin/liblibrespot.rlib
+RUN           chmod 555 /dist/boot/bin/*
+
+WORKDIR       /dist/boot/lib/
+RUN           cp /usr/lib/"$(uname -m)"-linux-gnu/libasound.so.2  .
 
 #######################
 # Running image
 #######################
 FROM          dubodubonduponey/base:runtime
 
-USER          root
-
-ARG           DEBIAN_FRONTEND="noninteractive"
-ENV           TERM="xterm" LANG="C.UTF-8" LC_ALL="C.UTF-8"
-RUN           apt-get update -qq              \
-              && apt-get install -qq --no-install-recommends \
-                libasound2=1.1.8-1            \
-              && apt-get -qq autoremove       \
-              && apt-get -qq clean            \
-              && rm -rf /var/lib/apt/lists/*  \
-              && rm -rf /tmp/*                \
-              && rm -rf /var/tmp/*
-
-USER          dubo-dubon-duponey
-
-
-COPY          --from=builder /build/librespot/target/release/librespot ./bin/librespot
-COPY          --from=builder-healthcheck /dist/bin/http-health ./bin/
+COPY          --from=builder /dist .
 
 ENV           NAME=Sproutify
 ENV           PORT=10042

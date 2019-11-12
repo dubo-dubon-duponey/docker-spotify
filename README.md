@@ -70,7 +70,7 @@ Finally, any additional arguments provided when running the image will get fed t
 This is specifically relevant if you need to select a different alsa device, card or mixer, or use another librespot option.
 
 Here is an example:
-```
+```bash
 docker run -d \
     --name "spot" \
     --env "NAME=Super Name For Your Spotify Connect Endpoint" \
@@ -86,7 +86,7 @@ docker run -d \
 ```
 
 For a reference of all librespot options, try:
-```
+```bash
 docker run --rm \
     dubodubonduponey/librespot:v1 \
     --help

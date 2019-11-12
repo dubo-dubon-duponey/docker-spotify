@@ -38,14 +38,14 @@ RUN           rm /dist/boot/bin/liblibrespot.rlib
 RUN           chmod 555 /dist/boot/bin/*
 
 WORKDIR       /dist/boot/lib/
-RUN           cp /usr/lib/"$(uname -m)"-linux-gnu/libasound.so.2  .
+RUN           cp /usr/lib/"$(gcc -dumpmachine)"/libasound.so.2  .
 
 #######################
 # Running image
 #######################
 FROM          dubodubonduponey/base:runtime
 
-COPY          --from=builder /dist .
+COPY          --from=builder --chown=$BUILD_UID:root /dist .
 
 ENV           NAME=Sproutify
 ENV           PORT=10042

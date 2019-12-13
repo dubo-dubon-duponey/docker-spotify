@@ -27,9 +27,9 @@ RUN           apt-get install -qq --no-install-recommends \
 ARG           LIBRESPOT_VER=295bda7e489715b9e6c27a262f9a4fcd12fb7632
 
 RUN           git clone git://github.com/librespot-org/librespot
-RUN           git -C librespot      checkout $LIBRESPOT_VER
 
 WORKDIR       /build/librespot
+RUN           git checkout $LIBRESPOT_VER
 RUN           cargo build -Z unstable-options --release --out-dir /dist/boot/bin --no-default-features --features alsa-backend
 
 COPY          --from=builder-healthcheck /dist/boot/bin           /dist/boot/bin

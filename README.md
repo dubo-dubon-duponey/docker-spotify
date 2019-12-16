@@ -21,13 +21,13 @@ This is useful in the following scenarios:
     * [x] image runs with no capabilities
     * [x] process runs as a non-root user, disabled login, no shell
  * lightweight
-    * [x] based on `debian:buster-slim`
+    * [x] based on our slim [Debian buster version](https://github.com/dubo-dubon-duponey/docker-debian)
     * [x] simple entrypoint script
     * [x] multi-stage build with no installed dependencies for the runtime image
  * observable
     * [x] healthcheck
     * [x] log to stdout
-    * [ ] ~~prometheus endpoint~~
+    * [ ] ~~prometheus endpoint~~ not applicable
 
 ## Run
 

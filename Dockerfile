@@ -3,6 +3,7 @@
 #######################
 ARG           BUILDER_BASE=dubodubonduponey/base:builder
 ARG           RUNTIME_BASE=dubodubonduponey/base:runtime
+# hadolint ignore=DL3006
 FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS builder-healthcheck
 
 ARG           HEALTH_VER=51ebf8ca3d255e0c846307bf72740f731e6210c3
@@ -16,6 +17,7 @@ RUN           arch="${TARGETPLATFORM#*/}"; \
 #######################
 # Building image
 #######################
+# hadolint ignore=DL3006
 FROM          $BUILDER_BASE                                                                                             AS builder
 
 WORKDIR       /build
@@ -45,6 +47,7 @@ RUN           cp /usr/lib/"$(gcc -dumpmachine)"/libasound.so.2  .
 #######################
 # Running image
 #######################
+# hadolint ignore=DL3006
 FROM          $RUNTIME_BASE
 
 COPY          --from=builder --chown=$BUILD_UID:root /dist .

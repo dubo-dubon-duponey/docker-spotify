@@ -92,10 +92,6 @@ docker run --rm \
     --help
 ```
 
-#### Build time
+## Moar?
 
-You can rebuild the image using the following build arguments:
-
- * `BUILD_UID`
- 
-So to control which user-id to assign to the in-container user (default is 2000).
+See [DEVELOP.md](DEVELOP.md)

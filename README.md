@@ -57,11 +57,11 @@ Since the Spotify Connect protocol uses bonjour for discovery, you have to use h
 
 You may specify the following environment variables at runtime:
 
- * NAME (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
+ * `NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
 
 You can also tweak the following for control over which internal ports are being used:
 
- * PORT (eg: `10042`) controls the port used by the http command endpoint
+ * `PORT` (eg: `10042`) controls the port used by the http command endpoint
 
 Of course using any privileged port for that would require CAP_NET_BIND_SERVICE and a `--user=root` (not recommended...).
 
@@ -96,6 +96,6 @@ docker run --rm \
 
 You can rebuild the image using the following build arguments:
 
- * BUILD_UID
+ * `BUILD_UID`
  
 So to control which user-id to assign to the in-container user (default is 2000).

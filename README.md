@@ -34,12 +34,13 @@ This is useful in the following scenarios:
 The following is the most straight-forward example, using host networking:
 
 ```bash
-docker run -d \
+docker run -d --rm \
     --name "spot" \
     --env "NAME=Super Name For Your Spotify Connect Endpoint" \
-    --net host \
-    --device /dev/snd \
+    --volume /tmp \
     --group-add audio \
+    --device /dev/snd \
+    --net host \
     --cap-drop ALL \
     --read-only \
     dubodubonduponey/librespot:v1
@@ -49,34 +50,23 @@ docker run -d \
 
 ### Networking
 
-Since the Spotify Connect protocol uses bonjour for discovery, you have to use host networking, or alternatively mac-(or ip)-vlan.
+You need to run this in `host` or `mac(or ip)vlan` networking (because of mDNS).
 
-### Configuration reference
+### Additional arguments
 
-#### Runtime
-
-You may specify the following environment variables at runtime:
-
- * `NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
-
-You can also tweak the following for control over which internal ports are being used:
-
- * `PORT` (eg: `10042`) controls the port used by the http command endpoint
-
-Of course using any privileged port for that would require CAP_NET_BIND_SERVICE and a `--user=root` (not recommended...).
-
-Finally, any additional arguments provided when running the image will get fed to the `librespot` binary.
+Any additional arguments when running the image will get fed to the `librespot` binary.
 
 This is specifically relevant if you need to select a different alsa device, card or mixer, or use another librespot option.
 
 Here is an example:
 ```bash
-docker run -d \
+docker run -d --rm \
     --name "spot" \
     --env "NAME=Super Name For Your Spotify Connect Endpoint" \
-    --net host \
-    --device /dev/snd \
+    --volume /tmp \
     --group-add audio \
+    --device /dev/snd \
+    --net host \
     --cap-drop ALL \
     --read-only \
     dubodubonduponey/librespot:v1 \
@@ -91,6 +81,18 @@ docker run --rm \
     dubodubonduponey/librespot:v1 \
     --help
 ```
+
+### Custom configuration
+
+You may specify the following environment variables at runtime:
+
+ * `NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
+
+You can also tweak the following for control over which internal ports are being used:
+
+ * `PORT` (eg: `10042`) controls the port used by the http command endpoint
+
+Of course using any privileged port for that would require `CAP_NET_BIND_SERVICE` and a `--user=root` (not recommended...).
 
 ## Moar?
 

@@ -36,19 +36,31 @@ WORKDIR       /build/librespot
 RUN           git checkout $LIBRESPOT_VER
 RUN           cargo build -Z unstable-options --release --out-dir /dist/boot/bin --no-default-features --features alsa-backend
 
-COPY          --from=builder-healthcheck /dist/boot/bin           /dist/boot/bin
-
 RUN           rm /dist/boot/bin/liblibrespot.rlib
-RUN           chmod 555 /dist/boot/bin/*
 
-WORKDIR       /dist/boot/lib/
-RUN           cp /usr/lib/"$(gcc -dumpmachine)"/libasound.so.2  .
+COPY          --from=builder-healthcheck /dist/boot/bin           /dist/boot/bin
+RUN           chmod 555 /dist/boot/bin/*
 
 #######################
 # Running image
 #######################
 # hadolint ignore=DL3006
 FROM          $RUNTIME_BASE
+
+USER          root
+
+ARG           DEBIAN_FRONTEND="noninteractive"
+ENV           TERM="xterm" LANG="C.UTF-8" LC_ALL="C.UTF-8"
+RUN           apt-get update -qq \
+              && apt-get install -qq --no-install-recommends \
+                libasound2=1.1.8-1 \
+              && apt-get -qq autoremove       \
+              && apt-get -qq clean            \
+              && rm -rf /var/lib/apt/lists/*  \
+              && rm -rf /tmp/*                \
+              && rm -rf /var/tmp/*
+
+USER          dubo-dubon-duponey
 
 COPY          --from=builder --chown=$BUILD_UID:root /dist .
 
@@ -58,7 +70,6 @@ ENV           HEALTHCHECK_URL="http://127.0.0.1:$PORT/?action=getInfo"
 
 EXPOSE        $PORT/tcp
 
-VOLUME        /data
 VOLUME        /tmp
 
 HEALTHCHECK   --interval=30s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1

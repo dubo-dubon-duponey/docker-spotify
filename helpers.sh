@@ -54,6 +54,7 @@ docker buildx create --node "${VENDOR}0" --name "$VENDOR"
 docker buildx use "$VENDOR"
 
 docker buildx build --pull --platform "$PLATFORMS" \
+  --build-arg="FAIL_WHEN_OUTDATED=" \
   --build-arg="BUILDER_BASE=$BUILDER_BASE" \
   --build-arg="RUNTIME_BASE=$RUNTIME_BASE" \
   --build-arg="BUILD_CREATED=$DATE" \

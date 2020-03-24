@@ -14,11 +14,11 @@ BUILDER_BASE=dubodubonduponey/base:builder-${DEBIAN_DATE}
 RUNTIME_BASE=dubodubonduponey/base:runtime-${DEBIAN_DATE}
 
 # Behavioral
-PUSH=
+PUSH=--push
 CACHE=
 NO_PUSH="${NO_PUSH:-}"
 NO_CACHE="${NO_CACHE:-}"
-[ "$NO_PUSH" ] || PUSH=--push
+[ "$NO_PUSH" ]  && PUSH="--output type=docker"
 [ ! "$NO_CACHE" ] || CACHE=--no-cache
 
 # Automated metadata

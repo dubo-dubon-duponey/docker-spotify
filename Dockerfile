@@ -24,18 +24,20 @@ FROM          $BUILDER_BASE                                                     
 WORKDIR       /build
 
 # Maybe consider https://github.com/japaric/rust-cross for cross-compilation
-RUN           apt-get install -qq --no-install-recommends \
+RUN           apt-get update -qq && \
+              apt-get install -qq --no-install-recommends \
                 libasound2-dev=1.1.8-1 \
+                libpulse-dev=12.2-4+deb10u1 \
                 cargo=0.35.0-2
 
-# v0.1.0
-ARG           LIBRESPOT_VER=295bda7e489715b9e6c27a262f9a4fcd12fb7632
+# v0.1.1
+ARG           LIBRESPOT_VER=3672214e312d7a5634ca71837589555f9b0554e5
 
 RUN           git clone git://github.com/librespot-org/librespot
 
 WORKDIR       /build/librespot
 RUN           git checkout $LIBRESPOT_VER
-RUN           cargo build -Z unstable-options --release --out-dir /dist/boot/bin --no-default-features --features alsa-backend
+RUN           cargo build -Z unstable-options --release --out-dir /dist/boot/bin --no-default-features --features "alsa-backend,pulseaudio-backend"
 
 RUN           rm /dist/boot/bin/liblibrespot.rlib
 
@@ -55,6 +57,7 @@ ENV           TERM="xterm" LANG="C.UTF-8" LC_ALL="C.UTF-8"
 RUN           apt-get update -qq \
               && apt-get install -qq --no-install-recommends \
                 libasound2=1.1.8-1 \
+                libpulse0=12.2-4+deb10u1 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \
               && rm -rf /var/lib/apt/lists/*  \

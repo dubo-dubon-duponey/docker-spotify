@@ -17,11 +17,11 @@ BUILDER_BASE="${BUILDER_BASE:-dubodubonduponey/base:builder-${DEBIAN_DATE}}"
 RUNTIME_BASE="${RUNTIME_BASE:-dubodubonduponey/base:runtime-${DEBIAN_DATE}}"
 
 # Behavioral
-PUSH=
+PUSH=--push
 CACHE=
 NO_PUSH="${NO_PUSH:-}"
 NO_CACHE="${NO_CACHE:-}"
-[ "$NO_PUSH" ] || PUSH=--push
+[ "$NO_PUSH" ]  && PUSH="--output type=docker"
 [ ! "$NO_CACHE" ] || CACHE=--no-cache
 
 # Automated metadata
@@ -56,7 +56,7 @@ fi
 docker buildx create --node "${VENDOR}0" --name "$VENDOR" > /dev/null
 docker buildx use "$VENDOR"
 
-docker buildx build --pull --platform "$PLATFORMS" \
+docker buildx build --pull --platform "$PLATFORMS" --build-arg="FAIL_WHEN_OUTDATED=${FAIL_WHEN_OUTDATED:-}" \
   --build-arg="BUILDER_BASE=$BUILDER_BASE" \
   --build-arg="RUNTIME_BASE=$RUNTIME_BASE" \
   --build-arg="BUILD_CREATED=$DATE" \

@@ -16,7 +16,7 @@ DOCKERFILE="${DOCKERFILE:-Dockerfile}"
 BUILDER_BASE="${BUILDER_BASE:-dubodubonduponey/base:builder-${DEBIAN_DATE}}"
 RUNTIME_BASE="${RUNTIME_BASE:-dubodubonduponey/base:runtime-${DEBIAN_DATE}}"
 CONTEXT="${CONTEXT:-.}"
-
+BUILDX="${BUILDX:-}"
 # Behavioral
 APTPROXY="${APTPROXY:-}"
 GOPROXY="${GOPROXY:-}"

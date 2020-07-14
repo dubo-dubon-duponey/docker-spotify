@@ -17,14 +17,14 @@ This image is built using `dubodubonduponey/base:builder-$DEBIAN_DATE` and its r
 
 Both these images are built upon `dubodubonduponey/debian:$DEBIAN_DATE`, a debootstrapped version of Debian Buster, built from a Debian snapshot at `$DEBIAN_DATE`.
 
-At the time of this writing, `DEBIAN_DATE` evaluates to `2019-12-01`, and is updated every 15 days.
+At the time of this writing, `DEBIAN_DATE` evaluates to `2020-01-01`, and is updated every 15 days.
 
 You can find out more here:
 
  * https://github.com/dubo-dubon-duponey/docker-debian for the debootstrapped Debian base
  * https://github.com/dubo-dubon-duponey/docker-base for the builder and runtime images
 
-These images provide very little - they are (mostly) barebone Buster with metadata and some ONBUILD
+These images provide very little - they are (mostly) barebone Buster with some ONBUILD
 Docker syntactic sugar (metadata, user creation, entrypoint).
 
 Let me repeat: you have very little reason to go and add anything up there.
@@ -42,17 +42,17 @@ VENDOR="dubodubonduponey"
 IMAGE_NAME="super_image"
 
 # Tag name to publish
-IMAGE_TAG="v1"
+IMAGE_TAG="latest"
 
 # Image metadata (applied through labels)
 TITLE="My super image title"
 DESCRIPTION="My super image description"
 
 # Platforms you want to target (note: certain platforms may be unavailable for the underlying software)
-PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6}"
+PLATFORMS="linux/amd64,linux/arm64,linux/arm/v7"
 
 # Base debian image date to use (from our own base images)
-DEBIAN_DATE=2019-12-01
+DEBIAN_DATE=2020-01-01
 
 # Controls which user-id to assign to the in-container user
 BUILD_UID=2000
@@ -76,6 +76,14 @@ Hack away.
 
 Be sure to run `./test.sh` before submitting anything.
 
+### About branches
+
+`1` is the currently stable version that published images are based on.
+
+`master` contains (usually stable) changes likely to land in a release soon.
+
+`work` is a development branch, with possibly unstable / dramatic changes.
+
 ### Philosophy
 
  * keep it simple
@@ -90,15 +98,15 @@ Be sure to run `./test.sh` before submitting anything.
     * no root
     * no write
     * no cap
- * use existing infrastructure
+ * use the provided infrastructure
     * runnable artifacts go to:
         * `/boot/bin` (read-only)
-    * configuration goes to:
+    * configuration should be read from:
         * `/config` (read-only)
-    * certificates go to:
-        * `/certs` (read-write)
-    * persistent application data goes to:
-        * `/data` (read-write)
-    * volatile data go to:
-        * `/tmp` (read-write)
- * only use chroot if you really REALLY need root first
+    * certificates should go to:
+        * `/certs` (either read-only or read-write)
+    * persistent application data should use:
+        * `/data` (usually read-write)
+    * volatile data should use:
+        * `/tmp` (usually read-write)
+ * only use chroot to downgrade if you really REALLY need to start your entrypoint with "root"

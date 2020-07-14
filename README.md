@@ -15,7 +15,7 @@ This is useful in the following scenarios:
     * [x] linux/amd64
     * [x] linux/arm64
     * [x] linux/arm/v7
-    * [x] linux/arm/v6
+    * [ ] linux/arm/v6 (should build, disabled by default)
  * hardened:
     * [x] image runs read-only
     * [x] image runs with no capabilities
@@ -43,7 +43,7 @@ docker run -d --rm \
     --net host \
     --cap-drop ALL \
     --read-only \
-    dubodubonduponey/librespot:v1
+    dubodubonduponey/librespot
 ```
 
 ## Notes
@@ -69,7 +69,7 @@ docker run -d --rm \
     --net host \
     --cap-drop ALL \
     --read-only \
-    dubodubonduponey/librespot:v1 \
+    dubodubonduponey/librespot \
     --device default:CARD=Mojo \
     --enable-volume-normalisation \
     -v
@@ -78,7 +78,7 @@ docker run -d --rm \
 For a reference of all librespot options, try:
 ```bash
 docker run --rm \
-    dubodubonduponey/librespot:v1 \
+    dubodubonduponey/librespot \
     --help
 ```
 

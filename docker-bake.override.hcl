@@ -1,7 +1,3 @@
-variable "REGISTRY" {
-  default = "docker.io"
-}
-
 target "default" {
   inherits = ["shared"]
   args = {
@@ -9,6 +5,6 @@ target "default" {
     BUILD_DESCRIPTION = "A dubo image for Librespot"
   }
   tags = [
-    "${REGISTRY}/dubodubonduponey/librespot",
+    "dubodubonduponey/librespot",
   ]
 }

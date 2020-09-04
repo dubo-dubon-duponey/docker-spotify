@@ -32,8 +32,8 @@ RUN           apt-get update -qq && \
                 libpulse-dev=12.2-4+deb10u1 \
                 cargo=0.35.0-2
 
-# v0.1.1
-ARG           LIBRESPOT_VER=3672214e312d7a5634ca71837589555f9b0554e5
+# v0.1.3
+ARG           LIBRESPOT_VER=064359c26e0e0d29a820a542bb2e48bc237b3b49
 
 RUN           git clone git://github.com/librespot-org/librespot
 

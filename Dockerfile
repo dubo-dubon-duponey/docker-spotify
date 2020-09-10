@@ -26,6 +26,7 @@ FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                           
 
 WORKDIR       /build
 
+# hadolint ignore=DL4006
 RUN           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
 RUN           set -eu; \
@@ -52,8 +53,8 @@ RUN           set -eu; \
                 "linux/ppc64le")  arch=powerpc64le; abi=gnu;        ga=powerpc64le; ;; \
                 "linux/s390x")    arch=s390x;       abi=gnu;        ga=s390x;       ;; \
               esac; \
-              printf "%s\n%s\n" "[target.${arch}-unknown-linux-${abi}]" "linker = \"${ga}-linux-${abi}-gcc\"" >> $HOME/.cargo/config; \
-              PATH=$PATH:$HOME/.cargo/bin rustup target add ${arch}-unknown-linux-${abi}
+              printf "%s\n%s\n" "[target.${arch}-unknown-linux-${abi}]" "linker = \"${ga}-linux-${abi}-gcc\"" >> "$HOME/.cargo/config"; \
+              PATH="$PATH:$HOME/.cargo/bin" rustup target add "${arch}-unknown-linux-${abi}"
 
 # v0.1.3
 ARG           GIT_REPO=github.com/librespot-org/librespot

@@ -15,7 +15,10 @@ This is useful in the following scenarios:
     * [x] linux/amd64
     * [x] linux/arm64
     * [x] linux/arm/v7
-    * [ ] linux/arm/v6 (should build, disabled by default)
+    * [x] linux/s390x
+    * [x] linux/ppc64le
+    * [ ] linux/arm/v6 (may build, but unsupported right now)
+    * [ ] linux/386 (may build, but unsupported right now)
  * hardened:
     * [x] image runs read-only
     * [x] image runs with no capabilities
@@ -23,7 +26,9 @@ This is useful in the following scenarios:
  * lightweight
     * [x] based on our slim [Debian buster version](https://github.com/dubo-dubon-duponey/docker-debian)
     * [x] simple entrypoint script
-    * [x] multi-stage build with no installed dependencies for the runtime image
+    * [ ] multi-stage build ~~with no installed dependencies~~ dependent on the following for the runtime image:
+        * libpulse0
+        * libasound2
  * observable
     * [x] healthcheck
     * [x] log to stdout
@@ -52,7 +57,7 @@ docker run -d --rm \
 
 You need to run this in `host` or `mac(or ip)vlan` networking (because of mDNS).
 
-### Additional arguments
+### Additional arguments
 
 Any additional arguments when running the image will get fed to the `librespot` binary.
 

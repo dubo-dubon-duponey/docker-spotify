@@ -47,7 +47,7 @@ RUN           set -eu; \
 # XXX pin rust to install 1.46.0
 RUN           set -eu; \
               case "$TARGETPLATFORM" in \
-                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;        ;; \
+                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;      ;; \
                 "linux/arm64")    arch=aarch64;     abi=gnu;        ga=aarch64;     ;; \
                 "linux/arm/v7")   arch=armv7;       abi=gnueabihf;  ga=arm;         ;; \
                 "linux/ppc64le")  arch=powerpc64le; abi=gnu;        ga=powerpc64le; ;; \
@@ -68,7 +68,7 @@ RUN           mkdir -p /dist/boot/bin/
 
 RUN           set -eu; \
               case "$TARGETPLATFORM" in \
-                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=i686;        ;; \
+                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;      ;; \
                 "linux/arm64")    arch=aarch64;     abi=gnu;        ga=aarch64;     ;; \
                 "linux/arm/v7")   arch=armv7;       abi=gnueabihf;  ga=arm;         ;; \
                 "linux/ppc64le")  arch=powerpc64le; abi=gnu;        ga=powerpc64le; ;; \

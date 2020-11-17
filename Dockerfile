@@ -4,7 +4,7 @@ ARG           RUNTIME_BASE=dubodubonduponey/base:runtime
 #######################
 # Extra builder for healthchecker
 #######################
-# hadolint ignore=DL3006
+# hadolint ignore=DL3006,DL3029
 FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS builder-healthcheck
 
 ARG           GIT_REPO=github.com/dubo-dubon-duponey/healthcheckers
@@ -20,7 +20,7 @@ RUN           env GOOS=linux GOARCH="$(printf "%s" "$TARGETPLATFORM" | sed -E 's
 #######################
 # Building image
 #######################
-# hadolint ignore=DL3006
+# hadolint ignore=DL3006,DL3029
 FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS builder
 # Maybe consider https://github.com/japaric/rust-cross for cross-compilation
 

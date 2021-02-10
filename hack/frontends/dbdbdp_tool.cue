@@ -6,7 +6,7 @@ import (
 
 #Dubo: #Bake & {
   args: os.Getenv & {
-    DEBOOTSTRAP_DATE: string | * "2020-11-10"
+    DEBOOTSTRAP_DATE: string | * "2020-12-14"
     DEBOOTSTRAP_SUITE: string | * "buster"
 
     BUILD_CREATED: string | *"1900-01-01",
@@ -24,7 +24,7 @@ import (
     SYSTEM_TLS_CA: string | * ""
     SYSTEM_NETRC: string | * ""
 
-    APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/0.1 Acquire::Check-Valid-Until=no"
+    APT_OPTIONS: string | * "Acquire::HTTP::User-Agent=DuboDubonDuponey/1.0 Acquire::Check-Valid-Until=no"
     APT_GPG_KEYRING: string | * ""
     APT_TLS_CA: string | * ""
     APT_NETRC: string | * ""

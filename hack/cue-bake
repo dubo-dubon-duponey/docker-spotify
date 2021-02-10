@@ -57,14 +57,17 @@ setup::buildctl(){
 
 setup::buildkit(){
   docker inspect dbdbdp-buildkit 1>/dev/null 2>&1 || \
-    docker run --rm \
-      -d -p 4242:4242 \
+    docker run --rm -d \
+      -p 4242:4242 \
+      --network host \
       --name dbdbdp-buildkit \
+      --env MDNS_HOST=buildkit-mac \
+      --env MDNS_NAME="Dubo Buildkit on local machine" \
       --user root \
-      --entrypoint buildkitd \
       --privileged \
-      "$BUILDKIT_IMAGE" \
-        --root /data/buildkit --addr tcp://0.0.0.0:4242
+      "$BUILDKIT_IMAGE"
+#        --root /data/buildkit --addr tcp://0.0.0.0:4242
+#      --entrypoint buildkitd \
 #      --read-only \
 }
 
@@ -100,12 +103,12 @@ case "${1:-}" in
     setup::cue
     setup::buildctl "$BIN_LOCATION"
 
+    export BUILDKIT_HOST="${BUILDKIT_HOST:-tcp://0.0.0.0:4242}"
+
     # Setup buildkitd container optionally
-    if [ ! "${BUILDKIT_HOST:-}" ]; then
-      BUILDKIT_HOST=tcp://0.0.0.0:4242
+    if [ "${BUILDKIT_HOST:-}" == "tcp://buildkit-mac.local:4242" ] || [ "${BUILDKIT_HOST:-}" == "tcp://0.0.0.0:4242" ]; then
       setup::buildkit
     fi
-    export BUILDKIT_HOST
 
     target="${1:-image}"
     shift || true

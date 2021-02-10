@@ -22,6 +22,7 @@ _default_platformset=AMD64 + "," + ARM64 + "," + V7 + "," + PPC64LE + "," + S390
 // + "," + I386
 // + V6 + ","
 _tag_platforms: string | * _default_platformset | string @tag(platforms,type=string)
+_tag_hosts: string | * "" | string @tag(hosts,type=string)
 _tag_no_cache: bool | * false | bool @tag(no_cache,type=bool)
 _tag_pull: bool | * true | bool @tag(pull,type=bool)
 _tag_tags: string | * "" | string @tag(tags,type=string)
@@ -42,6 +43,7 @@ env: os.Getenv & {}
 	no_cache: _tag_no_cache
 	// XXX did I just break platform passthrough behavior?
   platforms: [...#Platform] | * strings.Split(_tag_platforms, ",")
+  hosts: [...string] | * strings.Split(_tag_hosts, ",")
 	tags: [...string]
 	tags: strings.Split(_tag_tags, ",")
 	_tags: strings.Join(tags, ",")
@@ -112,7 +114,9 @@ env: os.Getenv & {}
       "--opt", "target=\(target)",
       "--opt", "filename=\(dockerfile)",
       "--opt", "platform=\(strings.Join(platforms, ","))",
-    ]
+      "--opt", "add-hosts=\(strings.Join(hosts, ","))",
+      "--progress", "\(progress)"
+     ]
     $after: [xxx]
     // stdout: string // capture stdout
   }
@@ -150,6 +154,7 @@ env: os.Getenv & {}
       "--opt", "target=\(target)",
       "--opt", "filename=\(dockerfile)",
       "--opt", "platform=\(strings.Join(platforms, ","))",
+      "--opt", "add-hosts=\(strings.Join(hosts, ","))",
       "--progress", "\(progress)"
     ]
     $after: [debug]

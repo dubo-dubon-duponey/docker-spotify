@@ -11,7 +11,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/../"
 
 setup::docker(){
   if ! command -v docker > /dev/null; then
-    >&2 printf "You need to install docker on your system\n"
+    printf >&2 "You need to install docker on your system\n"
     return 1
   fi
 }
@@ -47,7 +47,7 @@ setup::buildctl(){
         docker cp installbuildctl:/boot/bin/buildctl "$destination/buildctl"
       ;;
       *)
-        >&2 printf "You need to install buildctl on your system: https://github.com/moby/buildkit#quick-start and copy it in %s\n" "$destination"
+        printf >&2 "You need to install buildctl on your system: https://github.com/moby/buildkit#quick-start and copy it in %s\n" "$destination"
         return 1
       ;;
     esac
@@ -115,7 +115,7 @@ case "${1:-}" in
 
     cd "$root"
     com=(cue "$@" "$target" "$root/hack/frontends/bake_tool.cue" "$root/hack/frontends/dbdbdp_tool.cue" "$root/bake_tool.cue")
-    >&2 printf "Debug, will do: %s\n" "BUILDKIT_HOST=$BUILDKIT_HOST ${com[*]}"
+    printf >&2 "Debug, will do: %s\n" "BUILDKIT_HOST=$BUILDKIT_HOST ${com[*]}"
     "${com[@]}" || {
       cd - > /dev/null
       echo "Execution failure"

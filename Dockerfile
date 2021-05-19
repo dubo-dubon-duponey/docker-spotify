@@ -1,5 +1,5 @@
-ARG           BUILDER_BASE=dubodubonduponey/base:builder
-ARG           RUNTIME_BASE=dubodubonduponey/base:runtime
+ARG           BUILDER_BASE=dubodubonduponey/base@sha256:b51f084380bc1bd2b665840317b6f19ccc844ee2fc7e700bf8633d95deba2819
+ARG           RUNTIME_BASE=dubodubonduponey/base@sha256:d28e8eed3e87e8dc5afdd56367d3cf2da12a0003d064b5c62405afbe4725ee99
 
 #######################
 # Extra builder for healthchecker
@@ -11,13 +11,14 @@ ARG           GIT_REPO=github.com/dubo-dubon-duponey/healthcheckers
 ARG           GIT_VERSION=51ebf8ca3d255e0c846307bf72740f731e6210c3
 ARG           BUILD_TARGET=./cmd/http
 ARG           BUILD_OUTPUT=http-health
+ARG           BUILD_FLAGS="-s -w"
 
 WORKDIR       $GOPATH/src/$GIT_REPO
 RUN           git clone git://$GIT_REPO .
 RUN           git checkout $GIT_VERSION
 # hadolint ignore=DL4006
-RUN           env GOOS=linux GOARCH="$(printf "%s" "$TARGETPLATFORM" | sed -E 's/^[^/]+\/([^/]+).*/\1/')" go build -v -ldflags "-s -w" \
-                -o /dist/boot/bin/"$BUILD_OUTPUT" "$BUILD_TARGET"
+RUN           env GOOS=linux GOARCH="$(printf "%s" "$TARGETPLATFORM" | sed -E 's/^[^/]+\/([^/]+).*/\1/')" go build -v \
+                -ldflags "$BUILD_FLAGS" -o /dist/boot/bin/"$BUILD_OUTPUT" "$BUILD_TARGET"
 
 #######################
 # Building image
@@ -46,7 +47,7 @@ RUN           set -eu; \
                 libasound2-dev:$debian_arch=1.1.8-1 \
                 crossbuild-essential-$debian_arch=12.6
 
-# XXX pin rust to install 1.46.0
+# XXX pin rust to install 1.48.0
 RUN           set -eu; \
               case "$TARGETPLATFORM" in \
                 "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;      ;; \
@@ -60,7 +61,10 @@ RUN           set -eu; \
 
 # v0.1.3
 ARG           GIT_REPO=github.com/librespot-org/librespot
-ARG           GIT_VERSION=064359c26e0e0d29a820a542bb2e48bc237b3b49
+# ARG           GIT_VERSION=064359c26e0e0d29a820a542bb2e48bc237b3b49
+
+# v0.2.0
+ARG           GIT_VERSION=59683d7965480e63c581dd03082ded6a080a1cd3
 
 WORKDIR       $GOPATH/src/$GIT_REPO
 RUN           git clone git://$GIT_REPO .
@@ -113,4 +117,4 @@ EXPOSE        $PORT/tcp
 
 VOLUME        /tmp
 
-HEALTHCHECK   --interval=30s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1
+HEALTHCHECK   --interval=120s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1

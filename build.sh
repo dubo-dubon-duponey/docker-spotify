@@ -46,64 +46,64 @@ docker::setup::context() {
 
 # Ensure we have a working docker environemnt to start
 docker::enable::experimental
->&2 printf " > Enabling docker experimental support.\n"
->&2 printf " > Verifying that docker buildx is working.\n"
+printf >&2 " > Enabling docker experimental support.\n"
+printf >&2 " > Verifying that docker buildx is working.\n"
 
 docker::test::buildx::working || {
-  >&2 printf "    |!| docker buildx is *not* functioning. Your version of docker might simply be too old. You need to manually fix this manually.\n"
+  printf >&2 "    |!| docker buildx is *not* functioning. Your version of docker might simply be too old. You need to manually fix this manually.\n"
   exit 1
 }
 
->&2 printf "    |x| docker buildx is operational.\n"
+printf >&2 "    |x| docker buildx is operational.\n"
 
 # Honor commands
 case "${1:-}" in
   "install-buildx")
-    >&2 printf " > installing buildx. Press enter to continue.\n"
+    printf >&2 " > installing buildx. Press enter to continue.\n"
     read -r
     docker::install::buildx || {
-      >&2 printf "    |!| failed installing docker buildx!\n"
+      printf >&2 "    |!| failed installing docker buildx!\n"
       exit 1
     }
-    >&2 printf "    |x| successfully installed docker buildx plugin from master.\n"
+    printf >&2 "    |x| successfully installed docker buildx plugin from master.\n"
     exit
     ;;
   "enable-multiarch")
-    >&2 printf "Installing qemu. Press enter to continue.\n"
+    printf >&2 "Installing qemu. Press enter to continue.\n"
     read -r
     docker::install::qemu || {
-      >&2 printf "    |!| failed installing qemu. Do you have permission to run privileged containers?\n"
+      printf >&2 "    |!| failed installing qemu. Do you have permission to run privileged containers?\n"
       exit 1
     }
-    >&2 printf "    |x| successfully ran docker qemu setup container. Your machine should be able to build multi arch images now.\n"
+    printf >&2 "    |x| successfully ran docker qemu setup container. Your machine should be able to build multi arch images now.\n"
     exit
     ;;
   "" | "--help")
-    >&2 printf "Available commands:\n"
-    >&2 printf " * install-buildx: install the latest master version of buildx from git, and copy it into your docker cli plugins folder\n"
-    >&2 printf " * enable-multiarch: enable multi-architecture support on this host by installing qemu (the docker way)\n"
-    >&2 printf "To build the project, pass any of the following arguments (passed directly to buildx bake):\n"
-    >&2 printf " * --push (to publish the build)\n"
-    >&2 printf " * --load (to load the result of the build into docker)\n"
-    >&2 printf " * --print (to dry-run and dump the build configuration)\n"
-    >&2 printf " * --no-cache (to bypass cache)\n"
-    >&2 printf "You may also override any of the variables using corresponding ENV variables\n"
-    >&2 printf "You may also override any bake value (platform, etc) using build bake syntax: https://github.com/docker/buildx#buildx-bake-options-target\n"
+    printf >&2 "Available commands:\n"
+    printf >&2 " * install-buildx: install the latest master version of buildx from git, and copy it into your docker cli plugins folder\n"
+    printf >&2 " * enable-multiarch: enable multi-architecture support on this host by installing qemu (the docker way)\n"
+    printf >&2 "To build the project, pass any of the following arguments (passed directly to buildx bake):\n"
+    printf >&2 " * --push (to publish the build)\n"
+    printf >&2 " * --load (to load the result of the build into docker)\n"
+    printf >&2 " * --print (to dry-run and dump the build configuration)\n"
+    printf >&2 " * --no-cache (to bypass cache)\n"
+    printf >&2 "You may also override any of the variables using corresponding ENV variables\n"
+    printf >&2 "You may also override any bake value (platform, etc) using build bake syntax: https://github.com/docker/buildx#buildx-bake-options-target\n"
     exit
     ;;
 esac
 
->&2 printf " > Verifying that docker buildx is recent enough.\n"
+printf >&2 " > Verifying that docker buildx is recent enough.\n"
 docker::test::buildx::support || {
   printf >&2 "    |!| Your version of docker buildx does NOT support variable interpolation. It is too old. You need >=0.4. You can use: %s install-buildx to install a more recent version, or fix this manually yourself.\n" "${BASH_SOURCE[0]}"
   exit 1
 }
->&2 printf "    |x| buildx is recent enough.\n"
+printf >&2 "    |x| buildx is recent enough.\n"
 
->&2 printf " > Checking docker buildx build env.\n"
+printf >&2 " > Checking docker buildx build env.\n"
 [ "${BUILDX:-}" ] || docker::setup::context
 
->&2 printf " > Using:\n"
+printf >&2 " > Using:\n"
 >&2 docker buildx use "${BUILDX:-dubo-dubon-duponey}"
 >&2 docker buildx inspect
 

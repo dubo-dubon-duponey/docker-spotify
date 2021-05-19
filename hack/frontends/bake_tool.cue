@@ -18,10 +18,10 @@ I386: "linux/386"
 
 #Platform: AMD64 | ARM64 | V7 | V6 | PPC64LE | S390X | I386 | "local"
 
-_default_platformset=AMD64 + "," + ARM64 + "," + V7 + "," + PPC64LE + "," + S390X
+//_default_platformset=AMD64 + "," + ARM64 + "," + V7 + "," + PPC64LE + "," + S390X
 // + "," + I386
 // + V6 + ","
-_tag_platforms: string | * _default_platformset | string @tag(platforms,type=string)
+_tag_platforms: string | * (AMD64 + "," + ARM64 + "," + V7 + "," + PPC64LE + "," + S390X) | string @tag(platforms,type=string)
 _tag_hosts: string | * "" | string @tag(hosts,type=string)
 _tag_no_cache: bool | * false | bool @tag(no_cache,type=bool)
 _tag_pull: bool | * true | bool @tag(pull,type=bool)

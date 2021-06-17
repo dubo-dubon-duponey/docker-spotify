@@ -20,28 +20,13 @@ jobs:
           path: $GITHUB_WORKSPACE/cache
           key: cache
 
-      - name: Install hadolint
         # XXX move to container tooling
+      - name: Install hadolint
         run: |
-          curl --proto '=https' --tlsv1.2 -sSfL -o hadolint "https://github.com/hadolint/hadolint/releases/download/v1.22.1/hadolint-$(uname -s)-$(uname -m)"
+          curl --proto '=https' --tlsv1.3 -sSfL -o hadolint "https://github.com/hadolint/hadolint/releases/download/v2.5.0/hadolint-$(uname -s)-$(uname -m)"
           chmod 700 ./hadolint
 
-      - name: Install cuelang
-        # XXX move to beta4
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSfL -o cue.tar.gz "https://github.com/cuelang/cue/releases/download/v0.3.0-alpha6/cue_0.3.0-alpha6_$(uname -s)_$(uname -m).tar.gz"
-          tar -xf cue.tar.gz
-          rm cue.tar.gz
-
-      - name: Install buildctl
-        # XXX move to the one inside our buildkit container
-        run: |
-          curl --proto '=https' --tlsv1.2 -sSfL -o buildctl.tar.gz "https://github.com/moby/buildkit/releases/download/v0.8.1/buildkit-v0.8.1.linux-amd64.tar.gz"
-          tar -xf buildctl.tar.gz
-          rm buildctl.tar.gz
-          mv bin/buildctl .
-
-      # XXX running the old version for now until figuring out how to easily pass along the cert to apt-get
+      # XXX update this to a more recent apt proxy
       - name: Start apt proxy
         run: |
           mkdir -p "$GITHUB_WORKSPACE/cache/apt"
@@ -55,14 +40,14 @@ jobs:
               dubodubonduponey/aptutil:buster-2020-08-01
 
       - name: test
-        # XXX move to GH registry instead of Docker Hub for our base image
         run: |
-          PATH=$PATH:$(pwd)
-          cd "$GITHUB_WORKSPACE"
-          export APT_OPTIONS="Acquire::HTTP::proxy=http://$(docker inspect aptcache | jq -rc .[0].NetworkSettings.Networks.bridge.IPAddress):3142 Acquire::HTTP::User-Agent=GH-DuboDubonDuponey/1.0 Acquire::Check-Valid-Until=no"
-          export BASE_BASE="ghcr.io/dubo-dubon-duponey/base"
-          # Pinning to this for now... since did not push our latest debians to ghcr.io...
-          export DEBOOTSTRAP_DATE="2020-11-10"
           # Hiding the read-only token base64 to avoid github disabling it...
           echo OWMyMGVhYzk4N2NhYWQxYmI3MzhmNTZkODNmOGMwOGJjZjlhNDc4YQo= | base64 -d | docker login ghcr.io -u dubo-dubon-duponey --password-stdin
-          ./test.sh
+          # Set the path
+          export BIN_LOCATION="."
+          PATH="$BIN_LOCATION:$PATH"
+          cd "$GITHUB_WORKSPACE"
+          # Lint
+          ./hack/lint.sh
+          # Test, with our injected proxy and environment
+          ./test.sh --inject apt_proxy="http://$(docker inspect aptcache | jq -rc .[0].NetworkSettings.Networks.bridge.IPAddress):3142" ".github/workflows/environment.cue"

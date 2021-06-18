@@ -19,7 +19,7 @@ RUN           git clone --recurse-submodules git://"$GIT_REPO" . && git checkout
 ARG           GOOS="$TARGETOS"
 ARG           GOARCH="$TARGETARCH"
 
-# hadolint ignore=DL4006
+# hadolint ignore=SC2046
 RUN           env GOARM="$(printf "%s" "$TARGETVARIANT" | tr -d v)" go build -trimpath $(if [ "$CGO_ENABLED" = 1 ]; then printf "%s" "-buildmode pie"; fi) \
                 -ldflags "$GO_LD_FLAGS" -tags "$GO_TAGS" -o /dist/boot/bin/"$GO_BUILD_OUTPUT" "$GO_BUILD_SOURCE"
 
@@ -70,7 +70,6 @@ ARG           RUST_VERSION=1.53.0
 #              PATH="$PATH:$HOME/.cargo/bin" rustup target add "${arch}-unknown-linux-${abi}"
 
 # XXX pin rust to install 1.48.0
-# hadolint ignore=DL4006
 RUN           curl --proto '=https' --tlsv1.3 -sSf https://sh.rustup.rs | sh -s -- -y
 
 # XXX make this shit static

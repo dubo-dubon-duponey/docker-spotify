@@ -50,4 +50,4 @@ jobs:
           # Lint
           ./hack/lint.sh
           # Test, with our injected proxy and environment
-          ./test.sh --inject apt_proxy="http://$(docker inspect aptcache | jq -rc .[0].NetworkSettings.Networks.bridge.IPAddress):3142" ".github/workflows/environment.cue"
+          ./hack/test.sh --inject apt_proxy="http://$(docker inspect apt-cache | jq -rc .[0].NetworkSettings.Networks.bridge.IPAddress):3142" ".github/workflows/environment.cue"

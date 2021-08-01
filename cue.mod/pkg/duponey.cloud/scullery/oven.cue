@@ -120,6 +120,7 @@ import (
 	}] + [_tmp_dir]
 
 	run: exec.Run & {
+    // XXX sleep 1 is horrific, but necessary to ensure files are being written (the _dependencies are not sufficient it seems)
   	cmd: ["bash", "-c", #"""
     set -o errexit -o errtrace -o functrace -o nounset -o pipefail
     echo ------------------------------------------------------------------
@@ -137,7 +138,6 @@ import (
       fi
     done
     echo ------------------------------------------------------------------
-    # XXX Horrific, but necessary to ensure files are being written (the _dependencies are not sufficient it seems)
     sleep 1
     "$@"
     """#, "--"] + cake._buildkit.run

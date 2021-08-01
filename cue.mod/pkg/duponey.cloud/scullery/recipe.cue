@@ -3,28 +3,36 @@ package scullery
 import (
 	"duponey.cloud/buildkit/types"
 )
-// XXX buildkit oddity - FROM_IMAGE is not used (directly or indirectly) by this specific target, yet buildkit insist that it is defined and not blank
 
-// Status: functional, complete - needs a type review, and a thorough review of default values behavior
-
-// #Date: =~ "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
-
-// This defines properties of the image
-// Some of that may be changed through injects, or environment variables
 #Recipe: {
-	// Controls from what we are building, with what context - isn't this environment instead?
+	// Controls from what we are building:
+	// - where is the context
+	// - what is the root
+	// - what dockerfile
 	input: {
 		root: types.#Path | * "./"
 		context: types.#Path
-		from: types.#Image
+		// XXX this is more likely something from the environment
+		from: {
+			registry?: string
+			// XXXstart remove these once migration is finished
+			runtime?: types.#Image
+			builder?: types.#Image
+			auditor?: types.#Image
+			tools?: types.#Image
+			// XXXend remove these once migration is finished
+		}
 		dockerfile?: types.#FilePath
 		// XXX this should be an array
 		// XXX this should be injectable
 		// cache?: types.#CacheFrom
 	}
 
-	// Controls for which platform, and what target
-	// XXX secret provider?
+	// Controls what we are going to process
+	// - what platforms are we building
+	// - what target inside the dockerfile
+	// - what extra arguments do we want to pass
+	// - and what extra secrets
 	process: {
 		platforms?: types.#Platforms
 		target?: types.#Identifier
@@ -33,9 +41,30 @@ import (
 		secrets: types.#Secrets
 	}
 
-	// Controls the output: tags to push, directories, tarballs
+	// Controls the output:
+	// - images to push
+	// - directories
+	// - tarballs
 	output: {
+		images?: {
+			registries: {...},
+			names: [...string],
+			tags: [...string]
+		}
+
 		tags?: [...types.#Image]
+
+		if images != _|_ {
+			tags: [...types.#Image] | * [
+				for _registry, _namespace in images.registries for _tag in images.tags for _name in images.names {
+					types.#Image & {
+						registry: _registry
+						image: _namespace + "/" + _name
+						tag: _tag
+					},
+				},
+			]
+		}
 		directory?: types.#Path
 		tarball?: types.#Tarball
 		// XXX this should be an array
@@ -43,7 +72,7 @@ import (
 		// cache?: types.#CacheTo
 	}
 
-	// Standard metadata for the image - XXX this has nothing to do here
+	// Metadata to attach to the image
 	metadata: {
 		created: string | * "1976-04-14"
 		authors: =~ "^[^<]+ <[^>]+>$" | * "Dubo Dubon Duponey <dubo-dubon-duponey@farcloser.world>"

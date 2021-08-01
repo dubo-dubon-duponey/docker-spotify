@@ -5,11 +5,6 @@ import (
 	"duponey.cloud/buildkit/types"
 )
 
-// XXX you cannot have @tag in modules it seems...
-//#Injector: {
-//	...
-//}
-
 #Cake: {
 	// Takes image definition and user defined inputs
 	recipe: #Recipe
@@ -28,6 +23,13 @@ import (
 
 	// Connect the image definitions into buildkit (XXX and inject overrides?)
 	_buildkit: {
+		addr: icing.buildkit.address
+		tls: {
+			name : icing.buildkit.name
+			ca : icing.buildkit.ca
+			key : icing.buildkit.key
+			cert : icing.buildkit.cert
+		}
 		// XXX this does not work as expected, and is one of the most aggravating things about cue - the inability to have cascading defaults resolve to something (especially with @tags)
 		// If no context was provided at all, default to ./context for buildkit - this means that none of the scullery tooling can operate safely on the value of the context - fine
     context: string | * "./context"
@@ -66,7 +68,24 @@ import (
 		// Making these standard for now
     args: {
     	// This is sui generis
-    	FROM_IMAGE: recipe.input.from.toString,
+    	if recipe.input.from.registry != _|_ {
+	    	FROM_REGISTRY: recipe.input.from.registry,
+    	}
+
+			// XXXstart remove this when done migrating
+    	if recipe.input.from.runtime.toString != _|_ {
+    		FROM_IMAGE_RUNTIME: recipe.input.from.runtime.toString,
+    	}
+    	if recipe.input.from.builder.toString != _|_ {
+	    	FROM_IMAGE_BUILDER: recipe.input.from.builder.toString,
+    	}
+    	if recipe.input.from.tools.toString != _|_ {
+	    	FROM_IMAGE_TOOLS: recipe.input.from.tools.toString,
+    	}
+    	if recipe.input.from.auditor.toString != _|_ {
+	    	FROM_IMAGE_AUDITOR: recipe.input.from.auditor.toString,
+    	}
+			// XXXend remove this when done migrating
 
 			BUILD_TITLE: recipe.metadata.title
 			BUILD_DESCRIPTION: recipe.metadata.description
@@ -81,6 +100,12 @@ import (
 			BUILD_VENDOR: recipe.metadata.vendor
 			BUILD_REF_NAME: recipe.metadata.ref_name
     }
+
+		// XXX not really the right location for that - also suppose that an arg named GOPROXY exist, which is a problem - maybe secret instead?
+		// and/or maybe a proper subsystem that would control go env overall?
+		if icing.subsystems.go.proxy != _|_ {
+			args: GOPROXY: icing.subsystems.go.proxy
+		}
 
 		for _k, _v in icing.hosts {
 			if _v.ip != _|_ {

@@ -32,4 +32,4 @@ package types
 
 #Path: =~ "^.+$"
 
-#Identifier: =~ "^[a-zA-Z].*$"
+#Identifier: =~ "^[a-zA-Z._-].*$"

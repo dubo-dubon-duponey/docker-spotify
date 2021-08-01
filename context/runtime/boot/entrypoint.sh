@@ -11,3 +11,4 @@ PORT=${PORT:-10042}
 }
 
 exec librespot --cache /tmp/cache --name "$NAME" --bitrate 320 --device-type speaker --zeroconf-port "$PORT" "$@"
+# disable-discovery may be the right way to hide librespot mDNS announce

@@ -15,6 +15,7 @@ import (
 		netRC?: types.#FilePath
 
 		proxy_user?: string // XXX user:password?
+		minTLS: "1.3"
 	}
 
 	// XXX Proxy might be wide - it does not allow to differenciate http and https proxies
@@ -29,10 +30,11 @@ import (
 		if input.certificate != _|_ { "cert = \"\(input.certificate)\";" },
 		if input.key != _|_ { "proxy-key = \"\(input.key)\";" },
 		if input.key != _|_ { "key = \"\(input.key)\";" },
+		"tlsv\(input.minTLS)",
+		"proxy-tlsv1",
+		"proto = \"=https\""
 	]+ [""], "\n")
 
-	// tlsv1.2 = true
-	// proxy-tls
 	// # proxy-cert
 	// # proxy-key
 	// # proxy-pass

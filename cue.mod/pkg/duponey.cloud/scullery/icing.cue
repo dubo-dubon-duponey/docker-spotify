@@ -21,9 +21,10 @@ import (
 	[#Scheme]: {
 		login?: types.#Login
 		password?: types.#Password
-		certificate?: types.#Certificate
-		key?: types.#Key
-		keypass?: types.#Password
+		// XXX cannot have that in buildkit unfortunately - dynamic secrets...
+		// certificate?: types.#Certificate
+		// key?: types.#Key
+		// keypass?: types.#Password
 	}
 }
 
@@ -61,14 +62,23 @@ import (
 }
 
 #Icing: {
+	// XXX make this type more specific
+	buildkit?: {
+		address?: string | * "docker-container://buildkitd"
+		name?: string
+		ca?: types.#Path
+		cert?: types.#Path
+		key?: types.#Path
+	}
+
 	hosts: [types.#Domain]: #Host
 
 	trust: {
 		authority?: types.#Certificate
 		gpg?: types.#FilePath
-		// XXX this is foobar - cert and keys are per-host, and they are NOT currently connected with the corresponding secrets
 		certificate?: types.#Certificate
-		key?: types.#Key
+		// XXX THIS SEEMS like a horrific bug - using the #Key type silently mute anything referencing it
+		key?: _ // was #Key
 	}
 
 	cache: {
@@ -92,14 +102,13 @@ import (
 	if trust.authority != _|_ {
 		// secrets: CA: types.#Secret
 		secrets: CA: content: trust.authority
-		// XXX this is kind of weird - if apt uses a TLS proxy for HTTP, it delegates somewhat to the system for that and this needs to be system wide
-		subsystems: apt: _configurator: input: authority: secrets.CA.path | * "/etc/ssl/certs/ca-certificates.crt"
+		subsystems: apt: _configurator: input: authority: secrets.CA.path | * "/run/secrets/CA"
 		subsystems: curl: _configurator: input: authority: secrets.CA.path | * "/run/secrets/CA"
 	}
 	if trust.gpg != _|_ {
-		secrets: GPG: file: trust.gpg
+		secrets: "GPG.gpg": file: trust.gpg
 		// XXX for some reason, it does not inherit properly from properly defined secrets.GPG.path
-		subsystems: apt: _configurator: input: trusted: secrets.GPG.path | * "/run/secrets/GPG.gpg"
+		subsystems: apt: _configurator: input: trusted: secrets."GPG.gpg".path | * "/run/secrets/GPG.gpg"
 	}
 
 	let _netrc=strings.Join([
@@ -120,12 +129,14 @@ import (
 	}
 
 	// Bind into the configurators what has to be
-	if secrets.CERTIFICATE != _|_ {
+	if trust.certificate != _|_ {
+		secrets: CERTIFICATE: content: trust.certificate
 		subsystems: apt: _configurator: input: certificate: secrets.CERTIFICATE.path | *"/run/secrets/CERTIFICATE"
 		subsystems: curl: _configurator: input: certificate: secrets.CERTIFICATE.path | * "/run/secrets/CERTIFICATE"
 	}
 
-	if secrets.KEY != _|_ {
+	if trust.key != _|_ {
+		secrets: KEY: content: trust.key
  		subsystems: apt: _configurator: input: key: secrets.KEY.path | * "/run/secrets/KEY"
 		subsystems: curl: _configurator: input: key: secrets.KEY.path | * "/run/secrets/KEY"
 	}
@@ -147,11 +158,15 @@ import (
 
 	// XXX something happens if we test this
 	// if subsystems.apt._configurator.output != "" {
-		secrets: APT_OPTIONS: content: subsystems.apt._configurator.output
-		secrets: APT_OPTIONS: path: _ | *"/etc/apt/apt.conf.d/dbdbdp.conf"
+		secrets: APT_CONFIG: content: subsystems.apt._configurator.output
+		secrets: APT_CONFIG: path: _ | *"/run/secrets/APT_CONFIG"
 	//}
 	//if subsystems.curl._configurator.output != "" {
-		secrets: CURL_OPTIONS: content: subsystems.curl._configurator.output
-		secrets: CURL_OPTIONS: path: _ | *"/root/.curlrc"
+		// secrets: CURL_OPTIONS: content: subsystems.curl._configurator.output
+		// secrets: CURL_OPTIONS: path: _ | *"/root/.curlrc"
+
+		secrets: ".curlrc": content: subsystems.curl._configurator.output
+		secrets: ".curlrc": path: _ | *"/run/secrets/.curlrc"
+
 	//}
 }

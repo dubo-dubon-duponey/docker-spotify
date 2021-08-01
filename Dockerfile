@@ -18,6 +18,7 @@ ENV           GIT_COMMIT=59683d7965480e63c581dd03082ded6a080a1cd3
 RUN           git clone --recurse-submodules git://"$GIT_REPO" .
 RUN           git checkout "$GIT_COMMIT"
 
+# hadolint ignore=DL3009
 RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,uid=100,id=CERTIFICATE \
               --mount=type=secret,uid=100,id=KEY \
@@ -28,8 +29,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               apt-get update -qq; \
               for architecture in armel armhf arm64 ppc64el i386 s390x amd64; do \
                 apt-get install -qq --no-install-recommends \
-                  libpulse-dev:"$DEB_TARGET_ARCH"=14.2-2 \
-                  libasound2-dev:"$DEB_TARGET_ARCH"=1.2.4-1.1 \
+                  libpulse-dev:"$architecture"=14.2-2 \
+                  libasound2-dev:"$architecture"=1.2.4-1.1; \
               done
 
 #######################

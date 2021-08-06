@@ -30,11 +30,6 @@ cakes: {
 
 			output: {
 				images: {
-					registries: {...} | * {
-						"push-registry.local": "dubo-dubon-duponey",
-						"ghcr.io": "dubo-dubon-duponey",
-						"docker.io": "dubodubonduponey"
-					},
 					names: [...string] | * ["librespot"],
 					tags: [...string] | * ["latest"]
 				}
@@ -50,7 +45,7 @@ cakes: {
 
 injectors: {
 	suite: * "bullseye" | =~ "^(?:jessie|stretch|buster|bullseye|sid)$" @tag(suite, type=string)
-	date: * "2021-07-01" | =~ "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" @tag(date, type=string)
+	date: * "2021-08-01" | =~ "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" @tag(date, type=string)
 	platforms: string @tag(platforms, type=string)
 	registry: * "registry.local" | string @tag(registry, type=string)
 }
@@ -62,11 +57,6 @@ cakes: image: recipe: {
 		process: platforms: strings.Split(injectors.platforms, ",")
 	}
 
-	output: images: registries: {
-		"push-registry.local": "dubo-dubon-duponey",
-		"ghcr.io": "dubo-dubon-duponey",
-		"docker.io": "dubodubonduponey"
-	}
 
 	output: images: tags: [injectors.suite + "-" + injectors.date, injectors.suite + "-latest", "latest"]
 	metadata: ref_name: injectors.suite + "-" + injectors.date

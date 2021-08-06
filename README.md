@@ -24,7 +24,7 @@ This is useful in the following scenarios:
   * [x] image runs with no capabilities (unless you want it on port 443)
   * [x] process runs as a non-root user, disabled login, no shell
 * lightweight
-  * [x] based on our slim [Debian bullseye version (2021-07-01)](https://github.com/dubo-dubon-duponey/docker-debian)
+  * [x] based on our slim [Debian bullseye version (2021-08-01)](https://github.com/dubo-dubon-duponey/docker-debian)
   * [x] simple entrypoint script
   * [ ] multi-stage build ~~with no installed dependencies~~ dependent on the following for the runtime image:
     * libpulse0

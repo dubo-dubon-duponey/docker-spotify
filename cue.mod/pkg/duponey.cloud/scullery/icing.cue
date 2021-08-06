@@ -169,4 +169,7 @@ import (
 		secrets: ".curlrc": path: _ | *"/run/secrets/.curlrc"
 
 	//}
+	output: {
+		registries: {...}
+	}
 }

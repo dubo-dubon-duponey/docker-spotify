@@ -1,8 +1,8 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-07-01@sha256:f1c46316c38cc1ca54fd53b54b73797b35ba65ee727beea1a5ed08d0ad7e8ccf
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-07-01@sha256:9f5b20d392e1a1082799b3befddca68cee2636c72c502aa7652d160896f85b36
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-07-01@sha256:f1e25694fe933c7970773cb323975bb5c995fa91d0c1a148f4f1c131cbc5872c
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-08-01@sha256:f492d8441ddd82cad64889d44fa67cdf3f058ca44ab896de436575045a59604c
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-08-01@sha256:edc80b2c8fd94647f793cbcb7125c87e8db2424f16b9fd0b8e173af850932b48
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-08-01@sha256:87ec12fe94a58ccc95610ee826f79b6e57bcfd91aaeb4b716b0548ab7b2408a7
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -15,8 +15,7 @@ ENV           GIT_REPO=github.com/librespot-org/librespot
 ENV           GIT_VERSION=v0.2.0
 ENV           GIT_COMMIT=59683d7965480e63c581dd03082ded6a080a1cd3
 
-RUN           git clone --recurse-submodules git://"$GIT_REPO" .
-RUN           git checkout "$GIT_COMMIT"
+RUN           git clone --recurse-submodules git://"$GIT_REPO" .; git checkout "$GIT_COMMIT"
 
 # hadolint ignore=DL3009
 RUN           --mount=type=secret,uid=100,id=CA \
@@ -65,8 +64,15 @@ RUN           --mount=type=secret,id=CA \
               --mount=type=secret,id=.curlrc \
               curl -sSf https://sh.rustup.rs | sh -s -- -y
 
-# XXX make this shit static
-RUN           DEB_TARGET_ARCH="$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/armv6/armel/" -e "s/armv7/armhf/" -e "s/ppc64le/ppc64el/" -e "s/386/i386/")"; \
+# XXX this is using curl under the hood
+# Somehow, not passing secrets along seems to fuck things up because of
+# SSL_CERT_FILE <- this is bad if true
+RUN           --mount=type=secret,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=.curlrc \
+              DEB_TARGET_ARCH="$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/armv6/armel/" -e "s/armv7/armhf/" -e "s/ppc64le/ppc64el/" -e "s/386/i386/")"; \
               eval "$(dpkg-architecture -A "$DEB_TARGET_ARCH")"; \
               export PKG_CONFIG_ALLOW_CROSS=1; \
               export PKG_CONFIG="${DEB_TARGET_GNU_TYPE}-pkg-config"; \

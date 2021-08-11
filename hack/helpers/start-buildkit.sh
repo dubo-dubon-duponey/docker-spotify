@@ -7,7 +7,7 @@ export DATE=2021-08-01
 readonly IMAGE_BLDKT="${IMAGE_BLDKT:-ghcr.io/dubo-dubon-duponey/buildkit:$SUITE-$DATE}"
 
 setup::buildkit() {
-  docker inspect dbdbdp-buildkit 1>/dev/null 2>&1 || {
+  [ "$(docker container inspect -f '{{.State.Running}}' dbdbdp-buildkit 2>/dev/null)" == "true" ]  || {
     docker run --pull always --rm -d \
       -p 4242:4242 \
       --network host \

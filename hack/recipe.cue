@@ -30,14 +30,14 @@ cakes: {
 
 			output: {
 				images: {
-					names: [...string] | * ["librespot"],
+					names: [...string] | * ["spotify"],
 					tags: [...string] | * ["latest"]
 				}
 			}
 
 			metadata: {
-				title: string | * "Dubo Librespot",
-				description: string | * "A dubo image for Librespot",
+				title: string | * "Dubo Spotify",
+				description: string | * "A Spotify connect receiver",
 			}
 		}
   }

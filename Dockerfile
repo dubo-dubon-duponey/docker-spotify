@@ -1,9 +1,10 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-08-01@sha256:f492d8441ddd82cad64889d44fa67cdf3f058ca44ab896de436575045a59604c
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-08-01@sha256:0f9017945c84b48c5e9906f3325409ab446964a9e97c65a1e1820f2dd3ff1b2c
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-08-01@sha256:cec37383d167e274e3140f2b5db8cb80d0fb406538372f0c23ba09d97ee0b2a3
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-08-01@sha256:edc80b2c8fd94647f793cbcb7125c87e8db2424f16b9fd0b8e173af850932b48
+ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2021-08-01@sha256:e4c52b4e7e46a04b49989d3077e62858e7ce9335e21c88718c391b294ebd25fc
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-08-01@sha256:a49ab8a07a2da61eee63b7d9d33b091df190317aefb91203ad0ac41af18d5236
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-08-01@sha256:607d8b42af53ebbeb0064a5fd41895ab34ec670a810a704dbf53a2beb3ab769d
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-08-01@sha256:9e54b76442e4d8e1cad76acc3c982a5623b59f395b594af15bef6b489862ceac
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-08-01@sha256:3fdb7b859e3fea12a7604ff4ae7e577628784ac1f6ea0d5609de65a4b26e5b3c
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -27,7 +28,7 @@ ARG           TARGETARCH
 ARG           TARGETOS
 ARG           TARGETVARIANT
 
-COPY          --from=fetcher-alac /source /source
+COPY          --from=fetcher-main /source /source
 
 # hadolint ignore=DL3009
 RUN           --mount=type=secret,uid=100,id=CA \
@@ -41,7 +42,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
                 libpulse-dev:"$DEB_TARGET_ARCH"=14.2-2 \
-                libasound2-dev:"$DEB_TARGET_ARCH"=1.2.4-1.1; \
+                libasound2-dev:"$DEB_TARGET_ARCH"=1.2.4-1.1
 
 # Maybe consider https://github.com/japaric/rust-cross for cross-compilation
 
@@ -87,7 +88,9 @@ RUN           --mount=type=secret,id=CA \
 #######################
 # Builder assembly, XXX should be auditor
 #######################
-FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_AUDITOR                                              AS builder
+FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_AUDITOR                                              AS assembly
+
+ARG           TARGETARCH
 
 COPY          --from=builder-main   /dist/boot/bin           /dist/boot/bin
 
@@ -99,18 +102,20 @@ RUN           RUNNING=true \
               STATIC=true \
                 dubo-check validate /dist/boot/bin/http-health
 
-RUN           [ "$TARGETARCH" != "amd64" ] || export STACK_CLASH=true; \
-              RUNNING=true \
-              BIND_NOW=true \
-              STATIC=true \
+#RUN           [ "$TARGETARCH" != "amd64" ] || export STACK_CLASH=true; \
+#              STATIC=true \
+#              FORTIFIED=true \
+#              STACK_PROTECTED=true \
+
+# XXX missing libpulse-simple.so.0 - why are they dynamic?
+#RUN           RUNNING=true \
+#              NO_SYSTEM_LINK=true \
+RUN           BIND_NOW=true \
               PIE=true \
-              FORTIFIED=true \
-              STACK_PROTECTED=true \
               RO_RELOCATIONS=true \
-              NO_SYSTEM_LINK=true \
                 dubo-check validate /dist/boot/bin/librespot
 
-RUN           setcap 'cap_net_bind_service+ep' /dist/boot/bin/librespot
+# RUN           setcap 'cap_net_bind_service+ep' /dist/boot/bin/librespot
 
 RUN           chmod 555 /dist/boot/bin/*; \
               epoch="$(date --date "$BUILD_CREATED" +%s)"; \
@@ -144,7 +149,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
 
 USER          dubo-dubon-duponey
 
-COPY          --from=builder --chown=$BUILD_UID:root /dist /
+COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
 ENV           NAME=Sproutify
 ENV           PORT=10042

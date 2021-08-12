@@ -92,7 +92,7 @@ FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_AUDITOR      
 
 ARG           TARGETARCH
 
-COPY          --from=builder-main   /dist/boot/bin           /dist/boot/bin
+COPY          --from=builder-main   /dist/boot           /dist/boot
 
 # What about TLS?
 #COPY          --from=builder-tools  /boot/bin/caddy          /dist/boot/bin

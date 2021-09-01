@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-# Get where we are
 # shellcheck source=/dev/null
 root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/../"
 readonly root
+
+# shellcheck source=/dev/null
+BIN_LOCATION="${BIN_LOCATION:-$root/cache/bin}" source "$root/hack/helpers/install-tools.sh"
 
 # Ignore some hadolint warnings that do not make much sense
 # DL3006 is about "dO nOT UsE --platform", which is really ludicrous

@@ -34,10 +34,10 @@ import (
 			addr: icing.buildkit.address
 		}
 		tls: {
-			name : icing.buildkit.name
-			ca : icing.buildkit.ca
-			key : icing.buildkit.key
-			cert : icing.buildkit.cert
+			name: icing.buildkit.name
+			ca: icing.buildkit.ca
+			key: icing.buildkit.key
+			cert: icing.buildkit.cert
 		}
 		// XXX this does not work as expected, and is one of the most aggravating things about cue - the inability to have cascading defaults resolve to something (especially with @tags)
 		// If no context was provided at all, default to ./context for buildkit - this means that none of the scullery tooling can operate safely on the value of the context - fine

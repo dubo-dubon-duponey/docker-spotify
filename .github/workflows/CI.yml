@@ -20,23 +20,19 @@ jobs:
           path: $GITHUB_WORKSPACE/cache
           key: cache
 
-        # XXX move to container tooling
-      - name: Install hadolint and shellcheck
+      - name: Prepare directories
         run: |
-          curl --proto '=https' --tlsv1.3 -sSfL -o hadolint "https://github.com/hadolint/hadolint/releases/download/v2.6.0/hadolint-$(uname -s)-$(uname -m)"
-          chmod 700 ./hadolint
-          curl --proto '=https' --tlsv1.3 -sSfL -o shellcheck.tar.xz "https://github.com/koalaman/shellcheck/releases/download/v0.7.2/shellcheck-v0.7.2.linux.$(uname -m).tar.xz"
-          tar -xf shellcheck.tar.xz
-          mv ./shellcheck-v0.7.2/shellcheck .
+          sudo mkdir -p "$GITHUB_WORKSPACE/cache/apt"
+          sudo mkdir -p "$GITHUB_WORKSPACE/cache/certs"
+          sudo mkdir -p "$GITHUB_WORKSPACE/cache/bin"
+          sudo chown -R 2000:root "$GITHUB_WORKSPACE/cache/apt"
+          sudo chown -R 2000:root "$GITHUB_WORKSPACE/cache/certs"
+          sudo chown -R $(id -u) "$GITHUB_WORKSPACE/cache/bin"
 
-      # XXX update this to a more recent apt proxy
       - name: Start apt proxy
         run: |
           # Hiding the read-only token base64 to avoid github disabling it...
           echo OWMyMGVhYzk4N2NhYWQxYmI3MzhmNTZkODNmOGMwOGJjZjlhNDc4YQo= | base64 -d | docker login ghcr.io -u dubo-dubon-duponey --password-stdin
-          mkdir -p "$GITHUB_WORKSPACE/cache/apt"
-          mkdir -p "$GITHUB_WORKSPACE/cache/certs"
-          sudo chown -R 2000:root "$GITHUB_WORKSPACE/cache"
           docker run --rm -d --expose 443 --expose 80 --pull always \
             --name apt-front \
             --read-only \
@@ -55,37 +51,21 @@ jobs:
 
       - name: test
         run: |
-          # Start buildkit
-          bkaddr="$(./hack/helpers/start-buildkit.sh)"
           # Set the path and install the tools
-          export BIN_LOCATION="$(pwd)"
-          ./hack/helpers/install-tools.sh
-          export PATH="$BIN_LOCATION:$PATH"
-          cd "$GITHUB_WORKSPACE"
+          BIN_LOCATION="$GITHUB_WORKSPACE/cache/bin" source ./hack/helpers/install-tools.sh
+          # Start buildkit
+          bkaddr="$(./hack/helpers/start-buildkit.sh 2>/dev/null)"
           # Sanity check
           echo "Sanity checks"
-          command -v "cue" > /dev/null || {
-            echo "Cue installation had failed"
-            exit 1
-          }
-          which cue
           cue version
-          command -v "buildctl" > /dev/null || {
-            echo "Cue installation had failed"
-            exit 1
-          }
-          which buildctl
+          hadolint --version
+          shellcheck --version
           buildctl --version
           buildctl --addr "$bkaddr" debug workers
-          which hadolint
-          hadolint --version
-          which shellcheck
-          shellcheck --version
           docker logs --tail 200 apt-front
           # Lint
           ./hack/lint.sh
           # Test, with our injected proxy and environment
-          #  --inject apt_proxy="http://$(docker inspect apt-front | jq -rc .[0].NetworkSettings.Networks.bridge.IPAddress):4443"
           ./hack/test.sh \
             --inject bk="$bkaddr" \
             --inject ip="$(docker inspect apt-front | jq -rc .[0].NetworkSettings.Networks.bridge.IPAddress)" \

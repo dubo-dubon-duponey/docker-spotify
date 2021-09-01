@@ -5,9 +5,11 @@ NAME=${NAME:-no name}
 PORT=${PORT:-10042}
 
 # Ensure the folder is writable
-[ -w "/tmp" ] || {
-  >&2 printf "/tmp is not writable. Check your mount permissions.\n"
+[ -w /tmp ] || {
+  printf >&2 "/tmp is not writable. Check your mount permissions.\n"
   exit 1
 }
 
+# This is purely cached music, so, disposable and transient
 exec librespot --cache /tmp/cache --name "$NAME" --bitrate 320 --device-type speaker --zeroconf-port "$PORT" "$@"
+# disable-discovery may be the right way to hide librespot mDNS announce

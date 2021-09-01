@@ -1,98 +1,146 @@
-ARG           BUILDER_BASE=dubodubonduponey/base:builder
-ARG           RUNTIME_BASE=dubodubonduponey/base:runtime
+ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
+
+ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2021-09-01@sha256:5f511b94c06380c64a5f67a4a9ea1751d0537a96310a6c6980ef54ed1898702c
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-09-01@sha256:12be2a6d0a64b59b1fc44f9b420761ad92efe8188177171163b15148b312481a
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-09-01@sha256:28d5eddcbbee12bc671733793c8ea8302d7d79eb8ab9ba0581deeacabd307cf5
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-09-01@sha256:e5535efb771ca60d2a371cd2ca2eb1a7d6b7b13cc5c4d27d48613df1a041431d
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-09-01@sha256:bbd3439247ea1aa91b048e77c8b546369138f910b5083de697f0d36ac21c1a8c
+
+FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
 #######################
-# Extra builder for healthchecker
+# Fetcher
 #######################
-# hadolint ignore=DL3006,DL3029
-FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS builder-healthcheck
+FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_FETCHER                                              AS fetcher-main
 
-ARG           GIT_REPO=github.com/dubo-dubon-duponey/healthcheckers
-ARG           GIT_VERSION=51ebf8ca3d255e0c846307bf72740f731e6210c3
+ARG           GIT_REPO=github.com/librespot-org/librespot
+ARG           GIT_VERSION=v0.2.0
+ARG           GIT_COMMIT=59683d7965480e63c581dd03082ded6a080a1cd3
 
-WORKDIR       $GOPATH/src/$GIT_REPO
-RUN           git clone git://$GIT_REPO .
-RUN           git checkout $GIT_VERSION
-# hadolint ignore=DL4006
-RUN           env GOOS=linux GOARCH="$(printf "%s" "$TARGETPLATFORM" | sed -E 's/^[^/]+\/([^/]+).*/\1/')" go build -v -ldflags "-s -w" \
-                -o /dist/boot/bin/http-health ./cmd/http
+RUN           git clone --recurse-submodules git://"$GIT_REPO" .; git checkout "$GIT_COMMIT"
 
 #######################
-# Building image
+# Main builder
 #######################
-# hadolint ignore=DL3006,DL3029
-FROM          --platform=$BUILDPLATFORM $BUILDER_BASE                                                                   AS builder
-# Maybe consider https://github.com/japaric/rust-cross for cross-compilation
+FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_BUILDER                                              AS builder-main
 
-WORKDIR       /build
+ARG           TARGETARCH
+ARG           TARGETOS
+ARG           TARGETVARIANT
 
-# hadolint ignore=DL4006
-RUN           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+COPY          --from=fetcher-main /source /source
 
-RUN           set -eu; \
-              case "$TARGETPLATFORM" in \
-                "linux/amd64")    debian_arch=amd64; ;; \
-                "linux/arm64")    debian_arch=arm64; ;; \
-                "linux/arm/v7")   debian_arch=armhf; ;; \
-                "linux/ppc64le")  debian_arch=ppc64el; ;; \
-                "linux/s390x")    debian_arch=s390x; ;; \
-              esac; \
-              dpkg --add-architecture $debian_arch; \
+# hadolint ignore=DL3009
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_CONFIG \
+              eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                libpulse-dev:$debian_arch=12.2-4+deb10u1 \
-                libasound2-dev:$debian_arch=1.1.8-1 \
-                crossbuild-essential-$debian_arch=12.6
+                libpulse-dev:"$DEB_TARGET_ARCH"=14.2-2 \
+                libasound2-dev:"$DEB_TARGET_ARCH"=1.2.4-1.1
 
-# XXX pin rust to install 1.46.0
-RUN           set -eu; \
-              case "$TARGETPLATFORM" in \
-                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;      ;; \
-                "linux/arm64")    arch=aarch64;     abi=gnu;        ga=aarch64;     ;; \
-                "linux/arm/v7")   arch=armv7;       abi=gnueabihf;  ga=arm;         ;; \
-                "linux/ppc64le")  arch=powerpc64le; abi=gnu;        ga=powerpc64le; ;; \
-                "linux/s390x")    arch=s390x;       abi=gnu;        ga=s390x;       ;; \
-              esac; \
-              printf "%s\n%s\n" "[target.${arch}-unknown-linux-${abi}]" "linker = \"${ga}-linux-${abi}-gcc\"" >> "$HOME/.cargo/config"; \
-              PATH="$PATH:$HOME/.cargo/bin" rustup target add "${arch}-unknown-linux-${abi}"
-
-# v0.1.3
-ARG           GIT_REPO=github.com/librespot-org/librespot
-ARG           GIT_VERSION=064359c26e0e0d29a820a542bb2e48bc237b3b49
-
-WORKDIR       $GOPATH/src/$GIT_REPO
-RUN           git clone git://$GIT_REPO .
-RUN           git checkout $GIT_VERSION
+# Maybe consider https://github.com/japaric/rust-cross for cross-compilation
 
 RUN           mkdir -p /dist/boot/bin/
 
-RUN           set -eu; \
-              case "$TARGETPLATFORM" in \
-                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;      ;; \
-                "linux/arm64")    arch=aarch64;     abi=gnu;        ga=aarch64;     ;; \
-                "linux/arm/v7")   arch=armv7;       abi=gnueabihf;  ga=arm;         ;; \
-                "linux/ppc64le")  arch=powerpc64le; abi=gnu;        ga=powerpc64le; ;; \
-                "linux/s390x")    arch=s390x;       abi=gnu;        ga=s390x;       ;; \
-              esac; \
-              PATH=$PATH:$HOME/.cargo/bin PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH=/usr/lib/$ga-linux-$abi/pkgconfig \
-                cargo build --locked --target=${arch}-unknown-linux-${abi} --release --no-default-features --features "alsa-backend,pulseaudio-backend"; \
-              cp ./target/${arch}-unknown-linux-${abi}/release/librespot /dist/boot/bin/
+ENV           RUST_VERSION=1.53.0
+#RUN           case "$TARGETPLATFORM" in \
+#                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;      ;; \
+#                "linux/arm64")    arch=aarch64;     abi=gnu;        ga=aarch64;     ;; \
+#                "linux/arm/v7")   arch=armv7;       abi=gnueabihf;  ga=arm;         ;; \ # DEB_TARGET_GNU_SYSTEM=linux-gnueabihf GA=$DEB_TARGET_GNU_CPU
+#                "linux/ppc64le")  arch=powerpc64le; abi=gnu;        ga=powerpc64le; ;; \ # GA=$DEB_TARGET_GNU_CPU
+#                "linux/s390x")    arch=s390x;       abi=gnu;        ga=s390x;       ;; \
+#              esac; \
+#              printf "%s\n%s\n" "[target.${arch}-unknown-linux-${abi}]" "linker = \"${ga}-linux-${abi}-gcc\"" >> "$HOME/.cargo/config"; \
+#              PATH="$PATH:$HOME/.cargo/bin" rustup target add "${arch}-unknown-linux-${abi}"
 
-COPY          --from=builder-healthcheck /dist/boot/bin           /dist/boot/bin
-RUN           chmod 555 /dist/boot/bin/*
+# XXX pin rust to install 1.48.0
+RUN           --mount=type=secret,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=.curlrc \
+              curl -sSf https://sh.rustup.rs | sh -s -- -y
+
+# XXX this is using curl under the hood
+# Somehow, not passing secrets along seems to fuck things up because of
+# SSL_CERT_FILE <- this is bad if true
+RUN           --mount=type=secret,id=CA \
+              --mount=type=secret,id=CERTIFICATE \
+              --mount=type=secret,id=KEY \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=.curlrc \
+              eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
+              export PKG_CONFIG_ALLOW_CROSS=1; \
+              export PKG_CONFIG="${DEB_TARGET_GNU_TYPE}-pkg-config"; \
+              export PATH="$PATH:$HOME/.cargo/bin"; \
+              printf "%s\n%s\n" "[target.$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM]" "linker = \"$DEB_TARGET_GNU_TYPE-gcc\"" >> "$HOME/.cargo/config"; \
+              rustup toolchain install "$RUST_VERSION"; \
+              rustup target add "$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM"; \
+              cargo build --locked --target="$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM" --release --no-default-features --features "alsa-backend,pulseaudio-backend"; \
+              cp ./target/"$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM"/release/librespot /dist/boot/bin/
+
+#######################
+# Builder assembly, XXX should be auditor
+#######################
+FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_AUDITOR                                              AS assembly
+
+ARG           TARGETARCH
+
+COPY          --from=builder-main   /dist/boot           /dist/boot
+
+# What about TLS?
+#COPY          --from=builder-tools  /boot/bin/caddy          /dist/boot/bin
+COPY          --from=builder-tools  /boot/bin/http-health    /dist/boot/bin
+
+RUN           RUNNING=true \
+              STATIC=true \
+                dubo-check validate /dist/boot/bin/http-health
+
+#RUN           [ "$TARGETARCH" != "amd64" ] || export STACK_CLASH=true; \
+#              STATIC=true \
+#              FORTIFIED=true \
+#              STACK_PROTECTED=true \
+
+# XXX missing libpulse-simple.so.0 - why are they dynamic?
+#RUN           RUNNING=true \
+#              NO_SYSTEM_LINK=true \
+RUN           BIND_NOW=true \
+              PIE=true \
+              RO_RELOCATIONS=true \
+                dubo-check validate /dist/boot/bin/librespot
+
+# RUN           setcap 'cap_net_bind_service+ep' /dist/boot/bin/librespot
+
+RUN           chmod 555 /dist/boot/bin/*; \
+              epoch="$(date --date "$BUILD_CREATED" +%s)"; \
+              find /dist/boot -newermt "@$epoch" -exec touch --no-dereference --date="@$epoch" '{}' +;
+
 
 #######################
 # Running image
 #######################
-# hadolint ignore=DL3006
-FROM          $RUNTIME_BASE
+FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME
 
 USER          root
 
-RUN           apt-get update -qq \
-              && apt-get install -qq --no-install-recommends \
-                libasound2=1.1.8-1 \
-                libpulse0=12.2-4+deb10u1 \
+# This should not be necessary and linked statically...
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_CONFIG \
+              apt-get update -qq && \
+              apt-get install -qq --no-install-recommends \
+                libasound2=1.2.4-1.1 \
+                libpulse0=14.2-2 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \
               && rm -rf /var/lib/apt/lists/*  \
@@ -101,7 +149,7 @@ RUN           apt-get update -qq \
 
 USER          dubo-dubon-duponey
 
-COPY          --from=builder --chown=$BUILD_UID:root /dist .
+COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
 ENV           NAME=Sproutify
 ENV           PORT=10042
@@ -111,4 +159,4 @@ EXPOSE        $PORT/tcp
 
 VOLUME        /tmp
 
-HEALTHCHECK   --interval=30s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1
+HEALTHCHECK   --interval=120s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1

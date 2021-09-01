@@ -11,28 +11,31 @@ This is useful in the following scenarios:
 
 ## Image features
 
- * multi-architecture:
-    * [x] linux/amd64
-    * [x] linux/arm64
-    * [x] linux/arm/v7
-    * [x] linux/s390x
-    * [x] linux/ppc64le
-    * [ ] linux/arm/v6 (may build, but unsupported right now)
-    * [ ] linux/386 (may build, but unsupported right now)
- * hardened:
-    * [x] image runs read-only
-    * [x] image runs with no capabilities
-    * [x] process runs as a non-root user, disabled login, no shell
- * lightweight
-    * [x] based on our slim [Debian buster version](https://github.com/dubo-dubon-duponey/docker-debian)
-    * [x] simple entrypoint script
-    * [ ] multi-stage build ~~with no installed dependencies~~ dependent on the following for the runtime image:
-        * libpulse0
-        * libasound2
- * observable
-    * [x] healthcheck
-    * [x] log to stdout
-    * [ ] ~~prometheus endpoint~~ not applicable
+* multi-architecture:
+  * [x] linux/amd64
+  * [x] linux/arm64
+  * [x] linux/arm/v7
+  * [x] linux/arm/v6
+* hardened:
+  * [x] image runs read-only
+  * [x] image runs with no capabilities (unless you want it on a privileged port)
+  * [x] process runs as a non-root user, disabled login, no shell
+* lightweight
+  * [x] based on our slim [Debian Bullseye](https://github.com/dubo-dubon-duponey/docker-debian)
+  * [x] simple entrypoint script
+  * [ ] multi-stage build ~~with no installed dependencies~~ dependent on the following for the runtime image:
+    * libpulse0
+    * libasound2
+* observable
+  * [x] healthcheck
+  * [x] log to stdout
+  * [ ] ~~prometheus endpoint~~
+
+unsupported (probably build, no interest):
+  * [ ] linux/386
+  * [ ] linux/ppc64le
+  * [ ] linux/s390x
+
 
 ## Run
 
@@ -48,7 +51,7 @@ docker run -d --rm \
     --net host \
     --cap-drop ALL \
     --read-only \
-    dubodubonduponey/librespot
+    ghcr.io/dubo-dubon-duponey/spotify
 ```
 
 ## Notes
@@ -74,7 +77,7 @@ docker run -d --rm \
     --net host \
     --cap-drop ALL \
     --read-only \
-    dubodubonduponey/librespot \
+    ghcr.io/dubo-dubon-duponey/spotify \
     --device default:CARD=Mojo \
     --enable-volume-normalisation \
     -v
@@ -83,7 +86,7 @@ docker run -d --rm \
 For a reference of all librespot options, try:
 ```bash
 docker run --rm \
-    dubodubonduponey/librespot \
+    ghcr.io/dubo-dubon-duponey/spotify \
     --help
 ```
 
@@ -97,7 +100,7 @@ You can also tweak the following for control over which internal ports are being
 
  * `PORT` (eg: `10042`) controls the port used by the http command endpoint
 
-Of course using any privileged port for that would require `CAP_NET_BIND_SERVICE` and a `--user=root` (not recommended...).
+Of course using any privileged port for that would require `CAP_NET_BIND_SERVICE`.
 
 ## Moar?
 

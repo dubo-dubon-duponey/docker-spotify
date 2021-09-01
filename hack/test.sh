@@ -13,7 +13,7 @@ shift || true
 if ! "$root/hack/build.sh" \
     --inject registry="ghcr.io/dubo-dubon-duponey" \
     --inject progress=plain \
-	  --inject date=2021-08-01 \
+	  --inject date=2021-09-01 \
 	  --inject suite=bullseye \
     --inject platforms=linux/arm64 \
   	"$name" "$@"; then

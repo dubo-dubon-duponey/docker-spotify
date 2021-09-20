@@ -1,10 +1,10 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
 ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2021-09-01@sha256:5f511b94c06380c64a5f67a4a9ea1751d0537a96310a6c6980ef54ed1898702c
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-09-01@sha256:12be2a6d0a64b59b1fc44f9b420761ad92efe8188177171163b15148b312481a
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-09-01@sha256:28d5eddcbbee12bc671733793c8ea8302d7d79eb8ab9ba0581deeacabd307cf5
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-09-01@sha256:e5535efb771ca60d2a371cd2ca2eb1a7d6b7b13cc5c4d27d48613df1a041431d
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-09-01@sha256:bbd3439247ea1aa91b048e77c8b546369138f910b5083de697f0d36ac21c1a8c
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-09-15@sha256:a3d4c4de18d540fe3cb07e267511ba2afd5578f18840cd73c063277672e74119
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-09-15@sha256:6360e479e39b3c8e1491f599609039544e4e804595fcc8055e29d8615566fb3e
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-09-15@sha256:4271d38084f446152f778f343c8878508ee7a833c282ea0c418f9f80123b1c46
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-09-15@sha256:71341017729371c120ad7e97699c1d0aa39c7478cf4dbe67a0083680cf7b8e73
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -86,13 +86,35 @@ RUN           --mount=type=secret,id=CA \
               cp ./target/"$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM"/release/librespot /dist/boot/bin/
 
 #######################
-# Builder assembly, XXX should be auditor
+# Builder assembly
 #######################
 FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_AUDITOR                                              AS assembly
 
 ARG           TARGETARCH
+ARG           TARGETVARIANT
+
+# This should not be necessary and linked statically...
+RUN           --mount=type=secret,uid=100,id=CA \
+              --mount=type=secret,uid=100,id=CERTIFICATE \
+              --mount=type=secret,uid=100,id=KEY \
+              --mount=type=secret,uid=100,id=GPG.gpg \
+              --mount=type=secret,id=NETRC \
+              --mount=type=secret,id=APT_SOURCES \
+              --mount=type=secret,id=APT_CONFIG \
+              eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
+              apt-get update -qq && \
+              apt-get install -qq --no-install-recommends \
+                fbi:$DEB_TARGET_ARCH=2.10-4 \
+              && apt-get -qq autoremove       \
+              && apt-get -qq clean            \
+              && rm -rf /var/lib/apt/lists/*  \
+              && rm -rf /tmp/*                \
+              && rm -rf /var/tmp/*
 
 COPY          --from=builder-main   /dist/boot           /dist/boot
+
+RUN           cp $(which fbi) /dist/boot/bin
+RUN           setcap 'cap_sys_tty_config+ep' /dist/boot/bin/fbi
 
 # What about TLS?
 #COPY          --from=builder-tools  /boot/bin/caddy          /dist/boot/bin
@@ -141,6 +163,9 @@ RUN           --mount=type=secret,uid=100,id=CA \
               apt-get install -qq --no-install-recommends \
                 libasound2=1.2.4-1.1 \
                 libpulse0=14.2-2 \
+                curl=7.74.0-1.3+b1 \
+                fbi=2.10-4 \
+                jq=1.6-2.1 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \
               && rm -rf /var/lib/apt/lists/*  \
@@ -154,6 +179,10 @@ COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 ENV           NAME=Sproutify
 ENV           PORT=10042
 ENV           HEALTHCHECK_URL="http://127.0.0.1:$PORT/?action=getInfo"
+# Set to true to have librespot display coverart on your RPI framebuffer (/dev/fb0 and /dev/tty1 need to be mounted and CAP added)
+ENV           DISPLAY_ENABLED=false
+ENV           SPOTIFY_CLIENT_ID=""
+ENV           SPOTIFY_CLIENT_SECRET=""
 
 EXPOSE        $PORT/tcp
 

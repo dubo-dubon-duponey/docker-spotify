@@ -104,7 +104,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
               apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                fbi:$DEB_TARGET_ARCH=2.10-4 \
+                fbi:"$DEB_TARGET_ARCH"=2.10-4 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \
               && rm -rf /var/lib/apt/lists/*  \
@@ -113,7 +113,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
 
 COPY          --from=builder-main   /dist/boot           /dist/boot
 
-RUN           cp $(which fbi) /dist/boot/bin
+RUN           cp "$(which fbi)" /dist/boot/bin
 RUN           setcap 'cap_sys_tty_config+ep' /dist/boot/bin/fbi
 
 # What about TLS?

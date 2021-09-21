@@ -23,7 +23,8 @@ get::url(){
 
 display(){
   local img="$1"
-  fbi -a -noverbose -norandom -T 1 -once "$img"
+  # Should be smarter and verify permissions on the ttys or bail out
+  fbi -a -noverbose -norandom -T 2 -once "$img"
 }
 
 call(){

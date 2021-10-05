@@ -11,5 +11,5 @@ PORT=${PORT:-10042}
 }
 
 # This is purely cached music, so, disposable and transient
-exec librespot --onevent /boot/onevent.sh --cache /tmp/cache --name "$NAME" --bitrate 320 --device-type speaker --zeroconf-port "$PORT" "$@"
+exec librespot --onevent /boot/onevent.sh --cache-size-limit 8G --cache /tmp/cache --name "$NAME" --bitrate 320 --device-type speaker --zeroconf-port "$PORT" "$@"
 # disable-discovery may be the right way to hide librespot mDNS announce

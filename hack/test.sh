@@ -10,7 +10,7 @@ root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)/../"
 if ! "$root/hack/build.sh" \
     --inject registry="ghcr.io/dubo-dubon-duponey" \
     --inject progress=plain \
-	  --inject date=2021-09-01 \
+	  --inject date=2021-10-01 \
 	  --inject suite=bullseye \
     --inject platforms=linux/arm64 \
   	"image" "$@"; then

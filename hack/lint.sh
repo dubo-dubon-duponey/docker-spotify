@@ -24,4 +24,4 @@ if ! hadolint "${hadolint_ignore[@]}" "$root"/*Dockerfile*; then
   exit 1
 fi
 
-find "$root" -iname "*.sh" -exec shellcheck {} \;
+find "$root" -iname "*.sh" -not -path "*debuerreotype*" -exec shellcheck {} \;

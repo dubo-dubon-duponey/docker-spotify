@@ -119,6 +119,7 @@ RUN           setcap 'cap_sys_tty_config+ep' /dist/boot/bin/fbi
 # What about TLS?
 #COPY          --from=builder-tools  /boot/bin/caddy          /dist/boot/bin
 COPY          --from=builder-tools  /boot/bin/http-health    /dist/boot/bin
+COPY          --from=builder-tools  /boot/bin/goello-server-ng /dist/boot/bin
 
 RUN           RUNNING=true \
               STATIC=true \
@@ -174,9 +175,20 @@ RUN           --mount=type=secret,uid=100,id=CA \
 
 USER          dubo-dubon-duponey
 
+ENV           NICK="Sproutify"
+
 COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
-ENV           MDNS_NAME=Sproutify
+### mDNS broadcasting
+# Type to advertise
+ENV           MDNS_TYPE="_spotify-connect._tcp"
+# Name is used as a short description for the service
+ENV           MDNS_NAME="$NICK mDNS display name"
+# The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
+ENV           MDNS_HOST="$NICK"
+# Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
+ENV           MDNS_STATION=false
+
 ENV           PORT=10042
 # Will default to whatever is the system default
 ENV           DEVICE=""

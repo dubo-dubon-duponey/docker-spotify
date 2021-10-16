@@ -176,8 +176,13 @@ USER          dubo-dubon-duponey
 
 COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
-ENV           NAME=Sproutify
+ENV           MDNS_NAME=Sproutify
 ENV           PORT=10042
+# Will default to whatever is the system default
+ENV           DEVICE=""
+# (alsa|pulseaudio|pipe|process)
+ENV           OUTPUT=alsa
+
 ENV           HEALTHCHECK_URL="http://127.0.0.1:$PORT/?action=getInfo"
 # Set to true to have librespot display coverart on your RPI framebuffer (/dev/fb0 and /dev/tty1 need to be mounted and CAP added)
 ENV           DISPLAY_ENABLED=false

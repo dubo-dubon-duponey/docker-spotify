@@ -77,5 +77,4 @@ call(){
   display /tmp/framebuffer_album.jpg
 }
 
-# This seems to be blocking (librespot, whatsup?), so, avoid underrun issues
-call &
+call

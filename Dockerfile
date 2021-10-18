@@ -187,8 +187,9 @@ ENV           MDNS_NAME="$NICK mDNS display name"
 # The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
 ENV           MDNS_HOST="$NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
-ENV           MDNS_STATION=false
+ENV           MDNS_STATION=false  
 
+ENV           LOG_LEVEL=warn
 ENV           PORT=10042
 # Will default to whatever is the system default
 ENV           DEVICE=""

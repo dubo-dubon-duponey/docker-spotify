@@ -14,8 +14,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                  
 FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_FETCHER                                              AS fetcher-main
 
 ARG           GIT_REPO=github.com/librespot-org/librespot
-ARG           GIT_VERSION=v0.2.0
-ARG           GIT_COMMIT=59683d7965480e63c581dd03082ded6a080a1cd3
+ARG           GIT_VERSION=v0.3.0
+ARG           GIT_COMMIT=afbdd11f4597375e1cc540e03033d0889b47f220
 
 RUN           git clone --recurse-submodules git://"$GIT_REPO" .; git checkout "$GIT_COMMIT"
 

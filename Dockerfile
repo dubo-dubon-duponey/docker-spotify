@@ -1,10 +1,10 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2021-10-01@sha256:dd38f2bdc3c26ea49db6ccea3923b2bd320605a6fee3e1dcff469bac00346ae2
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-10-01@sha256:8500836fc43374bdb9831ac0d76d70054987aa210ac6c3f2caff0ddd8ac53b90
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-10-01@sha256:af728eaf5271cae6a948f5c4d34a43b4cff5dae16cc3e5dabf99a0aeea7986a9
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-10-01@sha256:24da09d01cc3505dd886672c0993f6f99b4fff4d1de2fcfbbe81aa52c880b9ac
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-10-01@sha256:5c76496f4dc901e9a59370babd9fa3c59427064971058b373121140a29fb153f
+ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2021-10-15@sha256:0baa9b0041a5b684ecec2fee65359b00773e41d087ce5413b1ce5801e97bfac4
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-10-15@sha256:33e021267790132e63be2cea08e77d64ec5d0434355734e94f8ff2d90c6f8944
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-10-15@sha256:eb822683575d68ccbdf62b092e1715c676b9650a695d8c0235db4ed5de3e8534
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-10-15@sha256:e8ec2d1d185177605736ba594027f27334e68d7984bbfe708a0b37f4b6f2dbd7
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-10-15@sha256:7072702dab130c1bbff5e5c4a0adac9c9f2ef59614f24e7ee43d8730fae2764c
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 

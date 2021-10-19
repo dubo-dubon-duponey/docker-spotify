@@ -18,7 +18,7 @@ args=(--cache-size-limit 8G --cache /tmp/cache --name "${MDNS_NAME:-Sproutify}" 
 [ ! "$SPOTIFY_CLIENT_ID" ] || [ ! "$SPOTIFY_CLIENT_SECRET" ] || [ ! "$DISPLAY_ENABLED" ] || args+=(--onevent /boot/onevent.sh)
 
 # mDNS blast if asked to
-[ ! "$MDNS_HOST" ] || {
+[ ! "${MDNS_HOST:-}" ] || {
   [ ! "${MDNS_STATION:-}" ] || mdns::add "_workstation._tcp" "$MDNS_HOST" "${MDNS_NAME:-}" "$PORT"
   mdns::add "${MDNS_TYPE:-_spotify-connect._tcp}" "$MDNS_HOST" "${MDNS_NAME:-}" "$PORT" '["VERSION=1", "CPath=/"]'
   mdns::start &

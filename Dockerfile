@@ -175,21 +175,22 @@ RUN           --mount=type=secret,uid=100,id=CA \
 
 USER          dubo-dubon-duponey
 
-ENV           NICK="Sproutify"
+# Disable by default as that prevents the zeroconf server to be started by librespot unfortunately...
+ENV           _SERVICE_NICK=""
+ENV           _SERVICE_TYPE="spotify-connect"
 
 COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
 ### mDNS broadcasting
 # Type to advertise
-ENV           MDNS_TYPE="_spotify-connect._tcp"
+ENV           MDNS_TYPE="_$_SERVICE_TYPE._tcp"
 # Name is used as a short description for the service
-ENV           MDNS_NAME="$NICK mDNS display name"
+ENV           MDNS_NAME="$_SERVICE_NICK mDNS display name"
 # The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
-# ENV           MDNS_HOST="$NICK"
-# Disable by default as that prevents the zeroconf server to be started by librespot unfortunately...
-ENV           MDNS_HOST=""
+ENV           MDNS_HOST="$_SERVICE_NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
-ENV           MDNS_STATION=false
+ENV           MDNS_STATION=true
+
 
 ENV           LOG_LEVEL=warn
 ENV           PORT=10042

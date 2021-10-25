@@ -19,9 +19,9 @@ args=(--cache-size-limit 8G --cache /tmp/cache --name "${MDNS_NAME:-Sproutify}" 
 
 # mDNS blast if asked to
 [ ! "${MDNS_HOST:-}" ] || {
-  [ ! "${MDNS_STATION:-}" ] || mdns::add "_workstation._tcp" "$MDNS_HOST" "${MDNS_NAME:-}" "$PORT"
-  mdns::add "${MDNS_TYPE:-_spotify-connect._tcp}" "$MDNS_HOST" "${MDNS_NAME:-}" "$PORT" '["VERSION=1", "CPath=/"]'
-  mdns::start &
+  [ ! "${MDNS_STATION:-}" ] || mdns::records::add "_workstation._tcp" "$MDNS_HOST" "${MDNS_NAME:-}" "$PORT"
+  mdns::records::add "${MDNS_TYPE:-_spotify-connect._tcp}" "$MDNS_HOST" "${MDNS_NAME:-}" "$PORT" '["VERSION=1", "CPath=/"]'
+  mdns::records::broadcast &
   args+=(--disable-discovery)
 }
 

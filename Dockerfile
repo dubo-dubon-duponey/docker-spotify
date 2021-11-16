@@ -4,7 +4,7 @@ ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2021-11-01@sha256:27069d77
 ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2021-11-01@sha256:23e78693390afaf959f940de6d5f9e75554979d84238503448188a7f30f34a7d
 ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2021-11-01@sha256:965d2e581c2b824bc03853d7b736c6b8e556e519af2cceb30c39c77ee0178404
 ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2021-11-01@sha256:8ee6c2243bacfb2ec1a0010a9b1bf41209330ae940c6f88fee9c9e99f9cb705d
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-11-01@sha256:c29f582f211999ba573b8010cdf623e695cc0570d2de6c980434269357a3f8ef
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2021-11-01@sha256:5dcd4cb6d31e1502b4f4b79ed1065a6d577bf3d2036f04886bd7ae347c99268f
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 

@@ -1,10 +1,10 @@
 ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-04-01@sha256:f8d1f21174380690d50f90e2729a7e9306e044bd04a65b4a58d91385998a3325
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-04-01@sha256:d73bb6ea84152c42e314bc9bff6388d0df6d01e277bd238ee0e6f8ade721856d
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-04-01@sha256:ca513bf0219f654afeb2d24aae233fef99cbcb01991aea64060f3414ac792b3f
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-04-01@sha256:323f3e36da17d8638a07a656e2f17d5ee4dc2b17dfea7e2da36e1b2174cc5f18
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-04-01@sha256:6456b76dd2eedf34b4c5c997f9ad92901220dfdd405ec63419d0b54b6d85a777
+ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-05-01@sha256:fb6b23026cef3c4c6c609c267a4595647ecc58d25a8d972d90145832fe7f4381
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-05-01@sha256:b97738238e9d1423b6de8d5a96f4310ae7039ffa4af19cd6a85f5f70d0faef99
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-05-01@sha256:984cf8672b483ca94333b5b37e19a95b115047dee05955767ed5b1bac1140e0c
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-05-01@sha256:6268013e3bd16eaaf7dd15c7689f8740bd00af1149c92795cc42fab4f3c6d07a
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-05-01@sha256:5e44963d961cf7594cf8a0d1bba98fd5da69d7881cb77c142a43ceab230e87df
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -14,8 +14,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                  
 FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_FETCHER                                              AS fetcher-main
 
 ARG           GIT_REPO=github.com/librespot-org/librespot
-ARG           GIT_VERSION=v0.3.1
-ARG           GIT_COMMIT=c1ac4cbb3ad3bbdaeb6f8582186442c69cdae744
+ARG           GIT_VERSION=v0.4.1
+ARG           GIT_COMMIT=88e64bd8843d812cb60f2d07de3f4d218f5c3b8c
 
 RUN           git clone --recurse-submodules https://"$GIT_REPO" .; git checkout "$GIT_COMMIT"
 

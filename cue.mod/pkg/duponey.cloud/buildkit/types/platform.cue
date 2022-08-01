@@ -6,7 +6,7 @@ import (
 
 #Platforms: {
 	// XXX for whatever reason, this HAS TO BE DONE THIS WAY and not as below
-	[...=~ "^(?:\(#AMD64)|\(#ARM64)|\(#V7)|\(#V6)|\(#PPC64LE)|\(#S390X)|\(#I386)|\(#RISCV64))$"] // | *[]
+	[...=~ "^(?:\(#AMD64)|\(#ARM64)|\(#V7)|\(#V6)|\(#V5)|\(#PPC64LE)|\(#MIPS64LE)|\(#S390X)|\(#I386)|\(#RISCV64))$"] // | *[]
 	// XXX might not work - other circumstances have demonstrated this is broken as fuck
   // [...#AMD64 | #ARM64 | #V7 | #V6 | #PPC64LE | #S390X | #I386 | #RISCV64] | *[]
 
@@ -14,7 +14,9 @@ import (
   #ARM64: "linux/arm64"
   #V7: "linux/arm/v7"
   #V6: "linux/arm/v6"
+  #V5: "linux/arm/v5"
   #PPC64LE: "linux/ppc64le"
+  #MIPS64LE: "linux/mips64le"
   #S390X: "linux/s390x"
   #I386: "linux/386"
 	#RISCV64: "linux/riscv64"

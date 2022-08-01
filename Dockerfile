@@ -1,10 +1,10 @@
-ARG           FROM_REGISTRY=ghcr.io/dubo-dubon-duponey
+ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-05-01@sha256:fb6b23026cef3c4c6c609c267a4595647ecc58d25a8d972d90145832fe7f4381
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-05-01@sha256:b97738238e9d1423b6de8d5a96f4310ae7039ffa4af19cd6a85f5f70d0faef99
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-05-01@sha256:984cf8672b483ca94333b5b37e19a95b115047dee05955767ed5b1bac1140e0c
+ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-06-01@sha256:7780f88fc0da1a5fd87f91cbb229e6932fc1fc2993f9c2d04210f6b909b93172
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-06-01@sha256:3fe68fe3e3eb1c295bd5213cc4a296e929ab59c139ba1a55a04f716c352229ee
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-06-01@sha256:a2f2097b9b24c3650e149acb25719f72e56b01df139f120fc1f783d46260a8ce
 ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-05-01@sha256:6268013e3bd16eaaf7dd15c7689f8740bd00af1149c92795cc42fab4f3c6d07a
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-05-01@sha256:5e44963d961cf7594cf8a0d1bba98fd5da69d7881cb77c142a43ceab230e87df
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-06-01@sha256:fe875fbfa104beb7afbcfafe3d8ab9b3640c7d25a0ea285a76bf3d71ca216300
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -14,8 +14,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                  
 FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_FETCHER                                              AS fetcher-main
 
 ARG           GIT_REPO=github.com/librespot-org/librespot
-ARG           GIT_VERSION=v0.4.1
-ARG           GIT_COMMIT=88e64bd8843d812cb60f2d07de3f4d218f5c3b8c
+ARG           GIT_VERSION=v0.4.2
+ARG           GIT_COMMIT=22f8aed3fc8c710761c79b3d14dd14c135c46de7
 
 RUN           git clone --recurse-submodules https://"$GIT_REPO" .; git checkout "$GIT_COMMIT"
 

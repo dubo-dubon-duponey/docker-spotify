@@ -10,11 +10,11 @@
 
 ### The what
 
-This image is built using: `ghcr.io/dubo-dubon-duponey/base:builder-bullseye-2021-11-01` 
+This image is built using: `index.docker.io/dubodubonduponey/base:builder-bullseye-2021-11-01` 
 
-The runtime part is based on: `ghcr.io/dubo-dubon-duponey/base:runtime-bullseye-2021-11-01`
+The runtime part is based on: `index.docker.io/dubodubonduponey/base:runtime-bullseye-2021-11-01`
 
-Both these images are built upon: `ghcr.io/dubo-dubon-duponey/debian:bullseye-2021-11-01`
+Both these images are built upon: `index.docker.io/dubodubonduponey/debian:bullseye-2021-11-01`
 
 You can find out more here:
 

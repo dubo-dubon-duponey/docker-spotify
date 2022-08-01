@@ -47,7 +47,7 @@ jobs:
             --env ADDITIONAL_DOMAINS=*.debian.org \
             --volume "$GITHUB_WORKSPACE/cache/certs":/certs \
             --volume "$GITHUB_WORKSPACE/cache/apt":/data \
-            ghcr.io/dubo-dubon-duponey/aptutil:bullseye-2021-08-01
+            index.docker.io/dubodubonduponey/aptutil:bullseye-2021-08-01
 
       - name: test
         run: |

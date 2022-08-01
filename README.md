@@ -51,7 +51,7 @@ docker run -d --rm \
     --net host \
     --cap-drop ALL \
     --read-only \
-    ghcr.io/dubo-dubon-duponey/spotify
+    index.docker.io/dubodubonduponey/spotify
 ```
 
 ## Notes
@@ -77,7 +77,7 @@ docker run -d --rm \
     --net host \
     --cap-drop ALL \
     --read-only \
-    ghcr.io/dubo-dubon-duponey/spotify \
+    index.docker.io/dubodubonduponey/spotify \
     --device default:CARD=Mojo \
     --enable-volume-normalisation \
     -v
@@ -86,7 +86,7 @@ docker run -d --rm \
 For a reference of all librespot options, try:
 ```bash
 docker run --rm \
-    ghcr.io/dubo-dubon-duponey/spotify \
+    index.docker.io/dubodubonduponey/spotify \
     --help
 ```
 

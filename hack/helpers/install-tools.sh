@@ -6,7 +6,7 @@ export DATE=2021-08-01
 
 export BIN_LOCATION="${BIN_LOCATION:-$HOME/bin}"
 export PATH="$BIN_LOCATION:$PATH"
-readonly IMAGE_TOOLS="${IMAGE_TOOLS:-ghcr.io/dubo-dubon-duponey/tools:$(uname -s | grep -q Darwin && printf "macos" || printf "linux-dev")-$SUITE-$DATE}"
+readonly IMAGE_TOOLS="${IMAGE_TOOLS:-dubodubonduponey/tools:$(uname -s | grep -q Darwin && printf "macos" || printf "linux-dev")-$SUITE-$DATE}"
 
 export SHELLCHECK_VERSION=0.7.2
 export HADOLINT_VERSION=2.7.0

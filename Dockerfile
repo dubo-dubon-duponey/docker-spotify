@@ -1,10 +1,10 @@
 ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-06-01@sha256:7780f88fc0da1a5fd87f91cbb229e6932fc1fc2993f9c2d04210f6b909b93172
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-06-01@sha256:3fe68fe3e3eb1c295bd5213cc4a296e929ab59c139ba1a55a04f716c352229ee
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-06-01@sha256:a2f2097b9b24c3650e149acb25719f72e56b01df139f120fc1f783d46260a8ce
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-05-01@sha256:6268013e3bd16eaaf7dd15c7689f8740bd00af1149c92795cc42fab4f3c6d07a
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-06-01@sha256:fe875fbfa104beb7afbcfafe3d8ab9b3640c7d25a0ea285a76bf3d71ca216300
+ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-08-01
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-08-01
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-08-01
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-08-01
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-08-01
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 

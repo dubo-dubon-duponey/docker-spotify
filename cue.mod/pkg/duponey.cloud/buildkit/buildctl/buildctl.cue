@@ -72,6 +72,7 @@ import (
 
 		["--local", "dockerfile=\(dockerfile)"] +
 		["--frontend", frontend] +
+		["--trace", "buildctl.trace.json"] +
 		["--opt", "filename=\(filename)"] +
 
 		["--local", "context=\(context)"] +

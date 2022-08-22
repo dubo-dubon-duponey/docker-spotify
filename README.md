@@ -44,7 +44,7 @@ The following is the most straight-forward example, using host networking:
 ```bash
 docker run -d --rm \
     --name "spot" \
-    --env "NAME=Super Name For Your Spotify Connect Endpoint" \
+    --env "MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
     --volume /tmp \
     --group-add audio \
     --device /dev/snd \
@@ -70,7 +70,7 @@ Here is an example:
 ```bash
 docker run -d --rm \
     --name "spot" \
-    --env "NAME=Super Name For Your Spotify Connect Endpoint" \
+    --env "MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
     --volume /tmp \
     --group-add audio \
     --device /dev/snd \
@@ -94,7 +94,7 @@ docker run --rm \
 
 You may specify the following environment variables at runtime:
 
- * `NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
+ * `MDNS_NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
 
 You can also tweak the following for control over which internal ports are being used:
 

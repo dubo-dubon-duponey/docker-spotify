@@ -4,7 +4,7 @@ set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 export SUITE=bullseye
 export DATE=2021-08-01
 
-readonly IMAGE_BLDKT="${IMAGE_BLDKT:-index.docker.io/dubodubonduponey/buildkit:$SUITE-$DATE}"
+readonly IMAGE_BLDKT="${IMAGE_BLDKT:-docker.io/dubodubonduponey/buildkit:$SUITE-$DATE}"
 
 setup::buildkit() {
   [ "$(docker container inspect -f '{{.State.Running}}' dbdbdp-buildkit 2>/dev/null)" == "true" ]  || {

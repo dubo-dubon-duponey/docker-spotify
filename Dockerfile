@@ -1,10 +1,10 @@
-ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
+ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-08-01
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-08-01
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-08-01
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-08-01
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-08-01
+ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-12-01
+ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-12-01
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-12-01
+ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-12-01
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-12-01
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -164,7 +164,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               apt-get install -qq --no-install-recommends \
                 libasound2=1.2.4-1.1 \
                 libpulse0=14.2-2 \
-                curl=7.74.0-1.3+deb11u1 \
+                curl=7.74.0-1.3+deb11u3 \
                 fbi=2.10-4 \
                 jq=1.6-2.1 \
               && apt-get -qq autoremove       \

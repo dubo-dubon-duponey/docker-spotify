@@ -1,10 +1,10 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-12-01
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-12-01
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-12-01
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-12-01
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-12-01
+ARG           FROM_IMAGE_FETCHER=base:golang-bookworm-2023-09-01
+ARG           FROM_IMAGE_BUILDER=base:builder-bookworm-2023-09-01
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bookworm-2023-09-01
+ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2023-09-01
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2023-09-01
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -41,8 +41,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                libpulse-dev:"$DEB_TARGET_ARCH"=14.2-2 \
-                libasound2-dev:"$DEB_TARGET_ARCH"=1.2.4-1.1
+                libpulse-dev:"$DEB_TARGET_ARCH"=16.1+dfsg1-2+b1 \
+                libasound2-dev:"$DEB_TARGET_ARCH"=1.2.8-1+b1
 
 # Maybe consider https://github.com/japaric/rust-cross for cross-compilation
 
@@ -104,7 +104,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
               apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                fbi:"$DEB_TARGET_ARCH"=2.10-4 \
+                fbi:"$DEB_TARGET_ARCH"=2.10-4+b1 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \
               && rm -rf /var/lib/apt/lists/*  \
@@ -162,10 +162,10 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                libasound2=1.2.4-1.1 \
-                libpulse0=14.2-2 \
-                curl=7.74.0-1.3+deb11u3 \
-                fbi=2.10-4 \
+                libasound2=1.2.8-1+b1 \
+                libpulse0=16.1+dfsg1-2+b1 \
+                curl=7.88.1-10+deb12u1 \
+                fbi=2.10-4+b1 \
                 jq=1.6-2.1 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \

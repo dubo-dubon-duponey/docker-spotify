@@ -1,10 +1,10 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bookworm-2023-09-01
-ARG           FROM_IMAGE_BUILDER=base:builder-bookworm-2023-09-01
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bookworm-2023-09-01
-ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2023-09-01
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2023-09-01
+ARG           FROM_IMAGE_FETCHER=base:golang-bookworm-2023-09-05
+ARG           FROM_IMAGE_BUILDER=base:builder-bookworm-2023-09-05
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bookworm-2023-09-05
+ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2023-09-05
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2023-09-05
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -182,16 +182,17 @@ ENV           _SERVICE_TYPE="spotify-connect"
 COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
 ### mDNS broadcasting
+# XXX note this unfortunately does not work with librespot
 # Whether to enable MDNS broadcasting or not
-ENV           MDNS_ENABLED=true
+ENV           MOD_MDNS_ENABLED=false
 # Type to advertise
-ENV           MDNS_TYPE="_$_SERVICE_TYPE._tcp"
+ENV           MOD_MDNS_TYPE="_$_SERVICE_TYPE._tcp"
 # Name is used as a short description for the service
-ENV           MDNS_NAME="$_SERVICE_NICK mDNS display name"
+ENV           MOD_MDNS_NAME="$_SERVICE_NICK mDNS display name"
 # The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
-ENV           MDNS_HOST="$_SERVICE_NICK"
+ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
-ENV           MDNS_STATION=true
+ENV           ADVANCED_MOD_MDNS_STATION=true
 
 
 ENV           LOG_LEVEL="warn"

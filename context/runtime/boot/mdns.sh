@@ -9,7 +9,7 @@ mdns::records::add(){
   local host="$2"
   local name="${3:-$host}"
   local port="${4:-9}"
-  local text="${5:-[]}"
+  local text="${5:-[\"\"]}" # XXX Goello bug - if [] the announce if not visible
   _internal_mod_mdns_records+=("$(printf '{"Type": "%s", "Host": "%s", "Name": "%s", "Port": %s, "Text": %s}' "$type" "$host" "$name" "$port" "$text")")
 }
 

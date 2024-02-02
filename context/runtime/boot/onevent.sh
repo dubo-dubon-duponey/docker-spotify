@@ -23,8 +23,12 @@ get::url(){
 
 display(){
   local img="$1"
+  local prior
+  prior="$(pidof fbi)"
   # Should be smarter and verify permissions on the ttys or bail out
   fbi -a -noverbose -norandom -T 2 -once "$img"
+  # shellcheck disable=SC2086
+  kill -s KILL $prior
 }
 
 call(){

@@ -25,7 +25,10 @@ args=(--cache-size-limit 8G --cache /tmp/cache --name "${MOD_MDNS_NAME:-Sproutif
   args+=(--disable-discovery)
 }
 
-[ "$(printf "%s" "$LOG_LEVEL" | tr '[:upper:]' '[:lower:]')" != "debug" ] || args+=(--verbose)
+normalized_log_level="$(printf "%s" "$LOG_LEVEL" | tr '[:upper:]' '[:lower:]')"
+[ "$normalized_log_level" != "debug" ] || args+=(--verbose)
+[ "$normalized_log_level" != "error" ] && [ "$normalized_log_level" != "warning" ]  || args+=(--quiet)
+
 [ ! "$OUTPUT" ] || args+=(--backend "$OUTPUT")
 [ ! "$DEVICE" ] || args+=(--device "$DEVICE")
 args+=("$@")

@@ -9,7 +9,7 @@ mdns::records::add(){
   local host="$2"
   local name="${3:-$host}"
   local port="${4:-9}"
-  local text="${5:-[\"\"]}" # XXX Goello bug - if [] the announce if not visible
+  local text="${5:-[\"\"]}" # XXX Goello bug - if [] the announce is not visible
   _internal_mod_mdns_records+=("$(printf '{"Type": "%s", "Host": "%s", "Name": "%s", "Port": %s, "Text": %s}' "$type" "$host" "$name" "$port" "$text")")
 }
 
@@ -54,7 +54,7 @@ mdns::start::avahi(){
   local avahisocket="$XDG_STATE_HOME/avahi-daemon/socket"
 
   # Make sure we can write it
-  helpers::dir::writable "$(dirname "$avahisocket")"
+  helpers::dir::writable "$(dirname "$avahisocket")" true
 
   # Cleanup leftovers on container restart
   rm -f "$(dirname "$avahisocket")/pid"

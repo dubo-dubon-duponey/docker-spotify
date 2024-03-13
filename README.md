@@ -44,14 +44,14 @@ The following is the most straight-forward example, using host networking:
 ```bash
 docker run -d --rm \
     --name "spot" \
-    --env "NAME=Super Name For Your Spotify Connect Endpoint" \
+    --env "MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
     --volume /tmp \
     --group-add audio \
     --device /dev/snd \
     --net host \
     --cap-drop ALL \
     --read-only \
-    index.docker.io/dubodubonduponey/spotify
+    docker.io/dubodubonduponey/spotify
 ```
 
 ## Notes
@@ -70,14 +70,14 @@ Here is an example:
 ```bash
 docker run -d --rm \
     --name "spot" \
-    --env "NAME=Super Name For Your Spotify Connect Endpoint" \
+    --env "MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
     --volume /tmp \
     --group-add audio \
     --device /dev/snd \
     --net host \
     --cap-drop ALL \
     --read-only \
-    index.docker.io/dubodubonduponey/spotify \
+    docker.io/dubodubonduponey/spotify \
     --device default:CARD=Mojo \
     --enable-volume-normalisation \
     -v
@@ -86,7 +86,7 @@ docker run -d --rm \
 For a reference of all librespot options, try:
 ```bash
 docker run --rm \
-    index.docker.io/dubodubonduponey/spotify \
+    docker.io/dubodubonduponey/spotify \
     --help
 ```
 
@@ -94,7 +94,7 @@ docker run --rm \
 
 You may specify the following environment variables at runtime:
 
- * `NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
+ * `MDNS_NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
 
 You can also tweak the following for control over which internal ports are being used:
 

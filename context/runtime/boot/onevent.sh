@@ -23,6 +23,12 @@ get::url(){
 
 display(){
   local img="$1"
+  local prior
+  prior="$(pidof fbi || true)"
+  # shellcheck disable=SC2086
+  [ "$prior" == "" ] || kill -s TERM $prior || true
+
+  printf "Done cleanup. Starting another cover."
   # Should be smarter and verify permissions on the ttys or bail out
   fbi -a -noverbose -norandom -T 2 -once "$img"
 }

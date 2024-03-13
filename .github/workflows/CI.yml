@@ -5,7 +5,7 @@ on: [push, pull_request]
 jobs:
   test:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -31,8 +31,6 @@ jobs:
 
       - name: Start apt proxy
         run: |
-          # Hiding the read-only token base64 to avoid github disabling it...
-          echo OWMyMGVhYzk4N2NhYWQxYmI3MzhmNTZkODNmOGMwOGJjZjlhNDc4YQo= | base64 -d | docker login ghcr.io -u dubo-dubon-duponey --password-stdin
           docker run --rm -d --expose 443 --expose 80 --pull always \
             --name apt-front \
             --read-only \
@@ -47,12 +45,13 @@ jobs:
             --env ADDITIONAL_DOMAINS=*.debian.org \
             --volume "$GITHUB_WORKSPACE/cache/certs":/certs \
             --volume "$GITHUB_WORKSPACE/cache/apt":/data \
-            index.docker.io/dubodubonduponey/aptutil:bullseye-2021-08-01
+            docker.io/dubodubonduponey/aptutil:bullseye-2021-08-01
 
       - name: test
         run: |
           # Set the path and install the tools
-          BIN_LOCATION="$GITHUB_WORKSPACE/cache/bin" source ./hack/helpers/install-tools.sh
+          export PATH="$GITHUB_WORKSPACE/cache/bin:$PATH"
+          ./hack/helpers/install-tools.sh
           # Start buildkit
           bkaddr="$(./hack/helpers/start-buildkit.sh 2>/dev/null)"
           # Sanity check

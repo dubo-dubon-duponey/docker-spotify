@@ -1,10 +1,10 @@
-ARG           FROM_REGISTRY=index.docker.io/dubodubonduponey
+ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bullseye-2022-06-01@sha256:7780f88fc0da1a5fd87f91cbb229e6932fc1fc2993f9c2d04210f6b909b93172
-ARG           FROM_IMAGE_BUILDER=base:builder-bullseye-2022-06-01@sha256:3fe68fe3e3eb1c295bd5213cc4a296e929ab59c139ba1a55a04f716c352229ee
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bullseye-2022-06-01@sha256:a2f2097b9b24c3650e149acb25719f72e56b01df139f120fc1f783d46260a8ce
-ARG           FROM_IMAGE_TOOLS=tools:linux-bullseye-2022-05-01@sha256:6268013e3bd16eaaf7dd15c7689f8740bd00af1149c92795cc42fab4f3c6d07a
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bullseye-2022-06-01@sha256:fe875fbfa104beb7afbcfafe3d8ab9b3640c7d25a0ea285a76bf3d71ca216300
+ARG           FROM_IMAGE_FETCHER=base:golang-bookworm-2024-02-20
+ARG           FROM_IMAGE_BUILDER=base:builder-bookworm-2024-02-20
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bookworm-2024-02-20
+ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2024-02-20
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2024-02-20
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -41,8 +41,8 @@ RUN           --mount=type=secret,uid=100,id=CA \
               eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
               apt-get update -qq; \
               apt-get install -qq --no-install-recommends \
-                libpulse-dev:"$DEB_TARGET_ARCH"=14.2-2 \
-                libasound2-dev:"$DEB_TARGET_ARCH"=1.2.4-1.1
+                libpulse-dev:"$DEB_TARGET_ARCH"=16.1+dfsg1-2+b1 \
+                libasound2-dev:"$DEB_TARGET_ARCH"=1.2.8-1+b1
 
 # Maybe consider https://github.com/japaric/rust-cross for cross-compilation
 
@@ -104,7 +104,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               eval "$(dpkg-architecture -A "$(echo "$TARGETARCH$TARGETVARIANT" | sed -e "s/^armv6$/armel/" -e "s/^armv7$/armhf/" -e "s/^ppc64le$/ppc64el/" -e "s/^386$/i386/")")"; \
               apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                fbi:"$DEB_TARGET_ARCH"=2.10-4 \
+                fbi:"$DEB_TARGET_ARCH"=2.10-4+b1 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \
               && rm -rf /var/lib/apt/lists/*  \
@@ -162,10 +162,10 @@ RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,id=APT_CONFIG \
               apt-get update -qq && \
               apt-get install -qq --no-install-recommends \
-                libasound2=1.2.4-1.1 \
-                libpulse0=14.2-2 \
-                curl=7.74.0-1.3+deb11u1 \
-                fbi=2.10-4 \
+                libasound2=1.2.8-1+b1 \
+                libpulse0=16.1+dfsg1-2+b1 \
+                curl=7.88.1-10+deb12u5 \
+                fbi=2.10-4+b1 \
                 jq=1.6-2.1 \
               && apt-get -qq autoremove       \
               && apt-get -qq clean            \
@@ -182,16 +182,17 @@ ENV           _SERVICE_TYPE="spotify-connect"
 COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
 ### mDNS broadcasting
+# XXX note this unfortunately does not work with librespot
 # Whether to enable MDNS broadcasting or not
-ENV           MDNS_ENABLED=true
+ENV           MOD_MDNS_ENABLED=false
 # Type to advertise
-ENV           MDNS_TYPE="_$_SERVICE_TYPE._tcp"
+ENV           MOD_MDNS_TYPE="_$_SERVICE_TYPE._tcp"
 # Name is used as a short description for the service
-ENV           MDNS_NAME="$_SERVICE_NICK mDNS display name"
+ENV           MOD_MDNS_NAME="$_SERVICE_NICK mDNS display name"
 # The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
-ENV           MDNS_HOST="$_SERVICE_NICK"
+ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
-ENV           MDNS_STATION=true
+ENV           ADVANCED_MOD_MDNS_STATION=true
 
 
 ENV           LOG_LEVEL="warn"

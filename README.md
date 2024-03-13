@@ -14,8 +14,6 @@ This is useful in the following scenarios:
 * multi-architecture:
   * [x] linux/amd64
   * [x] linux/arm64
-  * [x] linux/arm/v7
-  * [x] linux/arm/v6
 * hardened:
   * [x] image runs read-only
   * [x] image runs with no capabilities but NET_BIND_SERVICE
@@ -31,7 +29,9 @@ This is useful in the following scenarios:
   * [x] log to stdout
   * [ ] ~~prometheus endpoint~~
 
-unsupported (probably build, no interest):
+unsupported (probably builds - but I lost interest):
+  * [ ] linux/arm/v7
+  * [ ] linux/arm/v6
   * [ ] linux/386
   * [ ] linux/ppc64le
   * [ ] linux/s390x

@@ -14,8 +14,6 @@ This is useful in the following scenarios:
 * multi-architecture:
   * [x] linux/amd64
   * [x] linux/arm64
-  * [x] linux/arm/v7
-  * [x] linux/arm/v6
 * hardened:
   * [x] image runs read-only
   * [x] image runs with no capabilities but NET_BIND_SERVICE
@@ -31,7 +29,9 @@ This is useful in the following scenarios:
   * [x] log to stdout
   * [ ] ~~prometheus endpoint~~
 
-unsupported (probably build, no interest):
+unsupported (probably builds - but I lost interest):
+  * [ ] linux/arm/v7
+  * [ ] linux/arm/v6
   * [ ] linux/386
   * [ ] linux/ppc64le
   * [ ] linux/s390x
@@ -44,7 +44,7 @@ The following is the most straight-forward example, using host networking:
 ```bash
 docker run -d --rm \
     --name "spot" \
-    --env "MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
+    --env "MOD_MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
     --volume /tmp \
     --group-add audio \
     --device /dev/snd \
@@ -70,7 +70,7 @@ Here is an example:
 ```bash
 docker run -d --rm \
     --name "spot" \
-    --env "MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
+    --env "MOD_MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
     --volume /tmp \
     --group-add audio \
     --device /dev/snd \
@@ -94,7 +94,7 @@ docker run --rm \
 
 You may specify the following environment variables at runtime:
 
- * `MDNS_NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
+ * `MOD_MDNS_NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
 
 You can also tweak the following for control over which internal ports are being used:
 

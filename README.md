@@ -6,7 +6,7 @@ This is based on [LibreSpot](https://github.com/librespot-org/librespot).
 
 This is useful in the following scenarios:
 
- 1. you are a hobbyist and you want to turn a small appliance connected to speakers into a Spotify Connect receiver (typically a raspberry pi) 
+ 1. you are a hobbyist, and you want to turn a small appliance connected to speakers into a Spotify Connect receiver (typically a raspberry pi) 
  1. that's it :-)
 
 ## Image features
@@ -16,26 +16,16 @@ This is useful in the following scenarios:
   * [x] linux/arm64
 * hardened:
   * [x] image runs read-only
-  * [x] image runs with no capabilities but NET_BIND_SERVICE
+  * [x] image runs with no capabilities (you need NET_BIND_SERVICE if you want to use privileged ports obviously)
   * [x] process runs as a non-root user, disabled login, no shell
 * lightweight
-  * [x] based on our slim [Debian Bullseye](https://github.com/dubo-dubon-duponey/docker-debian)
+  * [x] based on our slim [Debian Bookworm](https://github.com/dubo-dubon-duponey/docker-debian)
   * [x] simple entrypoint script
-  * [ ] multi-stage build ~~with no installed dependencies~~ dependent on the following for the runtime image:
-    * libpulse0
-    * libasound2
+  * [ ] multi-stage build with ~~zero packages~~ `libpulse0`, `libasound2` installed in the runtime image
 * observable
   * [x] healthcheck
   * [x] log to stdout
   * [ ] ~~prometheus endpoint~~
-
-unsupported (probably builds - but I lost interest):
-  * [ ] linux/arm/v7
-  * [ ] linux/arm/v6
-  * [ ] linux/386
-  * [ ] linux/ppc64le
-  * [ ] linux/s390x
-
 
 ## Run
 

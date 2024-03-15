@@ -64,7 +64,7 @@ import (
 #Icing: {
 	// XXX make this type more specific
 	buildkit?: {
-		address?: string | * "docker-container://buildkitd"
+		address?: string | * "docker-container://dbdbdp-buildkit"
 		name?: string
 		ca?: types.#Path
 		cert?: types.#Path

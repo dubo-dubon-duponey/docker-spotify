@@ -189,7 +189,7 @@ ENV           MOD_MDNS_ENABLED=false
 ENV           MOD_MDNS_TYPE="_$_SERVICE_TYPE._tcp"
 # Name is used as a short description for the service
 ENV           MOD_MDNS_NAME="$_SERVICE_NICK mDNS display name"
-# The service will be annonced and reachable at $MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
+# The service will be annonced and reachable at $MOD_MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
 ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
 ENV           ADVANCED_MOD_MDNS_STATION=true

@@ -10,18 +10,18 @@
 
 ### The what
 
-This image is built using: `docker.io/dubodubonduponey/base:builder-bullseye-2022-12-01` 
+This image is built using: `docker.io/dubodubonduponey/base:builder-bookworm-2024-02-20` 
 
-The runtime part is based on: `docker.io/dubodubonduponey/base:runtime-bullseye-2022-12-01`
+The runtime part is based on: `docker.io/dubodubonduponey/base:runtime-bookworm-2024-02-20`
 
-Both these images are built upon: `docker.io/dubodubonduponey/debian:bullseye-2022-12-01`
+Both these images are built upon: `docker.io/dubodubonduponey/debian:bookworm-2024-02-20`
 
 You can find out more here:
 
  * https://github.com/dubo-dubon-duponey/docker-debian for the debootstrapped Debian base
  * https://github.com/dubo-dubon-duponey/docker-base for the builder and runtime images
 
-These images provide very little - they are (mostly) barebone bullseye with some ONBUILD
+These images provide very little - they are (mostly) barebone bookworm with some ONBUILD
 Docker syntactic sugar (metadata, user creation, entrypoint).
 
 Let me repeat: you have very little reason to go and add anything up there.

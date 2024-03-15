@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
-export SUITE=bullseye
-export DATE=2021-08-01
+export SUITE=bookworm
+export DATE=2024-02-20
 
 export BIN_LOCATION="${BIN_LOCATION:-$HOME/bin}"
 export PATH="$BIN_LOCATION:$PATH"
 readonly IMAGE_TOOLS="${IMAGE_TOOLS:-dubodubonduponey/tools:$(uname -s | grep -q Darwin && printf "macos" || printf "linux-dev")-$SUITE-$DATE}"
 
-export SHELLCHECK_VERSION=0.7.2
-export HADOLINT_VERSION=2.7.0
+export SHELLCHECK_VERSION=0.10.0
+export HADOLINT_VERSION=2.12.0
 
 setup::tools(){
   local location="$1"

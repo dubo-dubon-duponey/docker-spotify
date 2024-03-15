@@ -10,3 +10,23 @@ helpers::dir::writable(){
     exit 1
   }
 }
+
+helpers::log::normalize(){
+  local lower
+  lower="$(printf "%s" "${LOG_LEVEL:-}" | tr '[:upper:]' '[:lower:]')"
+  case "$lower" in
+  "debug")
+  ;;
+  "info")
+  ;;
+  "error")
+  ;;
+  *)
+    lower="warning"
+  ;;
+  esac
+  LOG_LEVEL="$lower"
+  printf "%s" "$LOG_LEVEL"
+}
+
+helpers::log::normalize >/dev/null

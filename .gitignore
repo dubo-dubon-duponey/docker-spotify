@@ -1,6 +1,4 @@
 .DS_Store
 /.idea
-*/cache/*
-cache
-*trace.json
-xxx-*
+cache/
+/xxx-*

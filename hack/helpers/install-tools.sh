@@ -2,7 +2,7 @@
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 export SUITE=bookworm
-export DATE=2024-02-20
+export DATE=2024-03-01
 
 export BIN_LOCATION="${BIN_LOCATION:-$HOME/bin}"
 export PATH="$BIN_LOCATION:$PATH"

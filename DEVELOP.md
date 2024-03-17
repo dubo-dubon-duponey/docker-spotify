@@ -10,11 +10,11 @@
 
 ### The what
 
-This image is built using: `docker.io/dubodubonduponey/base:builder-bookworm-2024-02-20` 
+This image is built using: `docker.io/dubodubonduponey/base:builder-bookworm-2024-03-01` 
 
-The runtime part is based on: `docker.io/dubodubonduponey/base:runtime-bookworm-2024-02-20`
+The runtime part is based on: `docker.io/dubodubonduponey/base:runtime-bookworm-2024-03-01`
 
-Both these images are built upon: `docker.io/dubodubonduponey/debian:bookworm-2024-02-20`
+Both these images are built upon: `docker.io/dubodubonduponey/debian:bookworm-2024-03-01`
 
 You can find out more here:
 

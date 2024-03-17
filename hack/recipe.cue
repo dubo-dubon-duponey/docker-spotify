@@ -45,7 +45,7 @@ cakes: {
 
 injectors: {
 	suite: * "bookworm" | =~ "^(?:bullseye|bookworm|trixie|sid)$" @tag(suite, type=string)
-	date: * "2024-02-20" | =~ "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" @tag(date, type=string)
+	date: * "2024-03-01" | =~ "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" @tag(date, type=string)
 	platforms: string @tag(platforms, type=string)
 	registry: * "registry.local" | string @tag(registry, type=string)
 }

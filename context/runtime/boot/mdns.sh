@@ -35,6 +35,32 @@ mdns::records::resolve(){
   printf "%s %s" "$server" "$port"
 }
 
+mdns::start::default(){
+  local host="${1:-}"
+  local name="${2:-}"
+  local with_http_proxy="${3:-}"
+  local with_http_proxy_https="${4:-}"
+  local with_tls_proxy="${5:-}"
+  local with_station="${6:-}"
+  local type="${7:-}"
+
+  local http_proxy_https_port="${7:-443}"
+  local http_proxy_http_port="${8:-80}"
+  local tls_proxy_port="${9:-443}"
+
+  local port="$tls_proxy_port"
+
+  [ "$with_http_proxy" != true ] || {
+    port="$([ "$with_http_proxy_https" == true ] && printf "%s" "$http_proxy_https_port" || printf "%s" "$http_proxy_http_port")"
+    type="${type:-_http._tcp}"
+  }
+  [ "$with_tls_proxy" != true ] || type="${type:-_tls._tcp}"
+
+  mdns::records::add "$type" "$host" "$name" "$port"
+  [ "$with_station" != true ] || mdns::records::add "_workstation._tcp" "$host" "$name" "$port"
+  mdns::start::broadcaster
+}
+
 mdns::start::broadcaster(){
   [ ! -e "$_default_mod_mdns_configuration_path" ] || mdns::records::load "$_default_mod_mdns_configuration_path"
   local IFS=","
@@ -83,10 +109,10 @@ mdns::start::dbus(){
   # https://man7.org/linux/man-pages/man3/sd_bus_default.3.html
   # https://specifications.freedesktop.org/basedir-spec/latest/ar01s03.html
 
-  # $XDG_STATE_HOME=/tmp/state
+  # $XDG_RUNTIME_DIR=/tmp/runtime
   # Configuration file also has that ^ hardcoded, so, cannot use the variable...
 
-  local dbussocket=/tmp/state/dbus/system_bus_socket
+  local dbussocket=/tmp/runtime/dbus/system_bus_socket
 
   # Ensure directory exists
   helpers::dir::writable "$(dirname "$dbussocket")" create

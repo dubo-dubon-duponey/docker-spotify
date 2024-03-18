@@ -8,11 +8,11 @@ readonly root
 # shellcheck source=/dev/null
 . "$root/mdns.sh"
 
-helpers::dir::writable /tmp
+helpers::dir::writable "$XDG_CACHE_HOME"
 
 readonly PORT="${PORT:-10042}"
 # This is purely cached music, so, disposable and transient
-args=(--cache-size-limit 8G --cache /tmp/cache --name "${MOD_MDNS_NAME:-Sproutify}" --bitrate 320 --device-type speaker --zeroconf-port "$PORT")
+args=(--cache-size-limit 8G --cache "$XDG_CACHE_HOME"/spotify --name "${MOD_MDNS_NAME:-Sproutify}" --bitrate 320 --device-type speaker --zeroconf-port "$PORT")
 
 # Hook the experimental display script if asked to
 [ ! "$SPOTIFY_CLIENT_ID" ] || [ ! "$SPOTIFY_CLIENT_SECRET" ] || [ ! "$DISPLAY_ENABLED" ] || args+=(--onevent /boot/onevent.sh)

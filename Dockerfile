@@ -181,6 +181,30 @@ ENV           _SERVICE_TYPE="_spotify-connect._tcp"
 
 COPY          --from=assembly --chown=$BUILD_UID:root /dist /
 
+### Generic configuration
+ENV           LOG_LEVEL="warn"
+
+### Audio module configuration common with other systens
+ENV           MOD_AUDIO_DEVICE=""
+# (alsa|pulseaudio|pipe|process)
+ENV           MOD_AUDIO_OUTPUT=alsa
+# only operative if mixer alsa is selected
+ENV           MOD_AUDIO_MIXER=""
+# no-op for Spotify
+ENV           MOD_AUDIO_MODE="stereo"
+ENV           MOD_AUDIO_VOLUME_DEFAULT="75"
+ENV           MOD_AUDIO_VOLUME_IGNORE=false
+
+### Spotify specific configuration hooks
+ENV           SPOTIFY_ENABLE_VOLUME_NORMALIZATION=true
+ENV           SPOTIFY_MIXER=softvol
+
+# Set to true to have librespot display coverart on your RPI framebuffer (/dev/fb0 and /dev/tty1 need to be mounted and CAP added)
+# XXX experimental for now - will be removed in a separate project, and use mqtt publishing instead
+ENV           _EXPERIMENTAL_DISPLAY_ENABLED=false
+ENV           _EXPERIMENTAL_SPOTIFY_CLIENT_ID=""
+ENV           _EXPERIMENTAL_SPOTIFY_CLIENT_SECRET=""
+
 ### mDNS broadcasting
 # XXX note this unfortunately does not work with librespot
 # Whether to enable MDNS broadcasting or not
@@ -194,22 +218,11 @@ ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
 # Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
 ENV           ADVANCED_MOD_MDNS_STATION=true
 
+# Port exposed
+ENV           ADVANCED_PORT=10042
 
-ENV           LOG_LEVEL="warn"
-ENV           PORT=10042
-# Will default to whatever is the system default
-ENV           DEVICE=""
-# (alsa|pulseaudio|pipe|process)
-ENV           OUTPUT=alsa
+EXPOSE        $ADVANCED_PORT/tcp
+VOLUME        "$XDG_CACHE_HOME"
 
-ENV           HEALTHCHECK_URL="http://127.0.0.1:$PORT/?action=getInfo"
-# Set to true to have librespot display coverart on your RPI framebuffer (/dev/fb0 and /dev/tty1 need to be mounted and CAP added)
-ENV           DISPLAY_ENABLED=false
-ENV           SPOTIFY_CLIENT_ID=""
-ENV           SPOTIFY_CLIENT_SECRET=""
-
-EXPOSE        $PORT/tcp
-
-VOLUME        /tmp
-
+ENV           HEALTHCHECK_URL="http://127.0.0.1:$ADVANCED_PORT/?action=getInfo"
 HEALTHCHECK   --interval=120s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1

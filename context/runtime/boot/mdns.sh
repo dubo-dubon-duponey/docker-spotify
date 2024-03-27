@@ -69,28 +69,35 @@ mdns::start::broadcaster(){
 
 mdns::start::avahi(){
   # Current issues with Avahi:
-  # - no way to change /run/avahi-daemon to another location - symlink works though
+  # - no way to change /run/avahi-daemon to another location - symlink works though (has to happen in the Dockerfile obviously)
   # - daemonization writing to syslog is a problem
   # - avahi insists that /run/avahi-daemon must belong to avahi:avahi
   # which is absolutely ridiculous - https://github.com/lathiat/avahi/blob/778fadb71cb923eee74f3f1967db88b8c2586830/avahi-daemon/main.c#L1434
   # Some variant of it: https://github.com/lathiat/avahi/issues/349
-  # - project is half-dead: https://github.com/lathiat/avahi/issues/388
+  # - project is half-dead anyway: https://github.com/lathiat/avahi/issues/388
 
+  local log_level="$1"
   local args=()
-  # local avahisocket="$XDG_STATE_HOME/avahi-daemon/socket"
-  # XXX giving up on trying to be fancy with avahi
   local avahisocket="/run/avahi-daemon/socket"
 
   # Make sure we can write it
-  helpers::dir::writable "$(dirname "$avahisocket")" true
+  helpers::dir::writable "$(dirname "$avahisocket")"
 
   # Cleanup leftovers on container restart
   rm -f "$(dirname "$avahisocket")/pid"
 
-  [ "$LOG_LEVEL" != "debug" ] || args+=(--debug)
+  [ "$log_level" != "debug" ] || args+=(--debug)
 
   # -D/--daemonize implies -s/--syslog that we do not want, so, just background it
-  avahi-daemon -f "$XDG_CONFIG_DIRS"/avahi/main.conf --no-drop-root --no-chroot "${args[@]}" &
+  # shellcheck disable=SC2015
+  {
+    {
+      avahi-daemon -f "$XDG_CONFIG_DIRS"/avahi/main.conf --no-drop-root --no-chroot "${args[@]}" 2>&1
+    } > >(helpers::logger::slurp "$log_level" "[avahi]") \
+      && helpers::logger::log INFO "[avahi]" "Avahi stopped" \
+      || helpers::logger::log ERROR "[avahi]" "Avahi stopped with exit code: $?"
+  } &
+
 
   local tries=1
   # Wait until the socket is there
@@ -98,9 +105,10 @@ mdns::start::avahi(){
     sleep 1s
     tries=$(( tries + 1))
     [ $tries -lt 10 ] || {
-      printf >&2 "Failed starting avahi in a reasonable time. Something is quite wrong\n"
+      helpers::logger::log ERROR "[avahi]" "Failed starting avahi in a reasonable time. Something is quite wrong"
       return 1
     }
+    helpers::logger::log DEBUG "[avahi]" "Avahi started successfully"
   done
 }
 
@@ -109,6 +117,7 @@ mdns::start::dbus(){
   # https://man7.org/linux/man-pages/man3/sd_bus_default.3.html
   # https://specifications.freedesktop.org/basedir-spec/latest/ar01s03.html
 
+  local log_level="$1"
   local dbussocket=/magnetar/runtime/dbus/system_bus_socket
   # Configuration file also has that ^ hardcoded, so, cannot use the variable...
 
@@ -119,8 +128,17 @@ mdns::start::dbus(){
   export DBUS_SYSTEM_BUS_ADDRESS=unix:path="$dbussocket"
   export DBUS_SESSION_BUS_ADDRESS=unix:path="$dbussocket"
 
-  # Start it, without a PID file
-  dbus-daemon --nopidfile --config-file "$XDG_CONFIG_DIRS"/dbus/main.conf
+  # Start it, without a PID file, no fork
+  # XXX somehow right now shairport-sync is not happy - disable custom config for now
+  # dbus-daemon --nofork --nopidfile --nosyslog --config-file "$XDG_CONFIG_DIRS"/dbus/main.conf
+  # shellcheck disable=SC2015
+  {
+    {
+      dbus-daemon --system --nofork --nopidfile --nosyslog 2>&1
+    } > >(helpers::logger::slurp "$log_level" "[dbus]") \
+      && helpers::logger::log INFO "[dbus]" "DBUS stopped" \
+      || helpers::logger::log ERROR "[dbus]" "DBUS stopped with exit code: $?"
+  } &
 
   local tries=1
   # Wait until the socket is there
@@ -128,8 +146,9 @@ mdns::start::dbus(){
     sleep 1s
     tries=$(( tries + 1))
     [ $tries -lt 10 ] || {
-      printf >&2 "Failed starting dbus in a reasonable time. Something is quite wrong\n"
+      helpers::logger::log ERROR "[dbus]" "Failed starting dbus in a reasonable time. Something is quite wrong"
       return 1
     }
   done
+  helpers::logger::log DEBUG "[dbus]" "DBUS started successfully"
 }

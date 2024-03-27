@@ -25,23 +25,62 @@ This is useful in the following scenarios:
 * observable
   * [x] healthcheck
   * [x] log to stdout
-  * [ ] ~~prometheus endpoint~~
+  * [ ] ~~prometheus endpoint~~ not applicable - one should rather monitor containers using a dedicated prometheus endpoint
 
 ## Run
 
 The following is the most straight-forward example, using host networking:
 
 ```bash
-docker run -d --rm \
-    --name "spot" \
-    --env "MOD_MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
-    --volume /tmp \
+docker run --rm \
+    --name spotify \
     --group-add audio \
     --device /dev/snd \
     --net host \
     --cap-drop ALL \
     --read-only \
-    docker.io/dubodubonduponey/spotify
+    --env "MOD_MDNS_NAME=Display name for your speaker"
+    docker.io/dubodubonduponey/spotify:bookworm-2024-03-01
+```
+
+And here is a compose file:
+```yaml
+spotify:
+  # Please pin a specific version, and do NOT use latest, which is prone to breaking changes
+  image: index.docker.io/dubodubonduponey/spotify:bookworm-2024-03-01
+  container_name: spotify
+  # See below note on networking - host or mac/ip-vlan is required for mDNS to work
+  network_mode: host
+  # anything you pass as command will be fed as extra arguments to the librespot binary for advanced control
+  #command: 
+  #  - autoplay
+  restart: always
+  environment:
+    - "MOD_MDNS_NAME=Display name for your speaker"
+    # Pick a verbosity: debug, info, warn, error
+    #- "LOG_LEVEL=warn"
+    # Output: supported are alsa, pulseaudio, pipe and process
+    #- "MOD_AUDIO_OUTPUT=alsa"
+    # If you are using a non default audio device, add it here - example: hw:CARD=sndrpihifiberry,DEV=0
+    # Note: you can list audio devices with `aplay -L`
+    #- "MOD_AUDIO_DEVICE=default"
+    # "alsa" if you want spotify to use the alsa mixer
+    #- "SPOTIFY_MIXER=softvol"
+    # If mixer alsa is selected, allow to pick a specific control - example: Digital
+    #- "MOD_AUDIO_MIXER="
+    # Initial default volume when starting (in percent)
+    #- "MOD_AUDIO_VOLUME_DEFAULT=75"
+    # If you want to entirely disable Spotify ability to control the volume
+    #- "MOD_AUDIO_VOLUME_IGNORE=false"
+    # If you want to disable volume normalization 
+    #- "SPOTIFY_ENABLE_VOLUME_NORMALIZATION=true"
+  group_add:
+    - audio
+  devices:
+    - /dev/snd
+  cap_drop:
+    - ALL
+  read_only: true
 ```
 
 ## Notes
@@ -54,26 +93,9 @@ You need to run this in `host` or `mac(or ip)vlan` networking (because of mDNS).
 
 Any additional arguments when running the image will get fed to the `librespot` binary.
 
-This is specifically relevant if you need to select a different alsa device, card or mixer, or use another librespot option.
+This is specifically relevant if you need to use a librespot option that is not hooked through environment variables.
 
-Here is an example:
-```bash
-docker run -d --rm \
-    --name "spot" \
-    --env "MOD_MDNS_NAME=Super Name For Your Spotify Connect Endpoint" \
-    --volume /tmp \
-    --group-add audio \
-    --device /dev/snd \
-    --net host \
-    --cap-drop ALL \
-    --read-only \
-    docker.io/dubodubonduponey/spotify \
-    --device default:CARD=Mojo \
-    --enable-volume-normalisation \
-    -v
-```
-
-For a reference of all librespot options, try:
+For example, just get --help for a list of all librespot options:
 ```bash
 docker run --rm \
     docker.io/dubodubonduponey/spotify \
@@ -82,15 +104,30 @@ docker run --rm \
 
 ### Custom configuration
 
+Commonly used options (see compose file example for details)
+* LOG_LEVEL
+* MOD_AUDIO_OUTPUT
+* MOD_AUDIO_DEVICE
+* SPOTIFY_MIXER
+* MOD_AUDIO_MIXER
+* MOD_AUDIO_VOLUME_DEFAULT
+* MOD_AUDIO_VOLUME_IGNORE
+* SPOTIFY_ENABLE_VOLUME_NORMALIZATION
+
+Advanced and experimental options:
+* ADVANCED_PORT
+* HEALTHCHECK_URL
+* _EXPERIMENTAL_DISPLAY_ENABLED
+* _EXPERIMENTAL_SPOTIFY_CLIENT_ID
+* _EXPERIMENTAL_SPOTIFY_CLIENT_SECRET
+
 You may specify the following environment variables at runtime:
 
- * `MOD_MDNS_NAME` (eg: `Totale Croquette`) controls the "name" under which your endpoint will appear in Spotify
+Note that changing the port to a privileged port requires you to add `CAP_NET_BIND_SERVICE`.
 
-You can also tweak the following for control over which internal ports are being used:
+### Experimental display
 
- * `PORT` (eg: `10042`) controls the port used by the http command endpoint
-
-Of course using any privileged port for that would require `CAP_NET_BIND_SERVICE`.
+Undocumented. Will be moved to a separate project.
 
 ## Moar?
 

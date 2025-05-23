@@ -2,7 +2,7 @@
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
 export SUITE=bookworm
-export DATE=2024-03-01
+export DATE=2025-05-01
 
 export BIN_LOCATION="${BIN_LOCATION:-$HOME/bin}"
 export PATH="$BIN_LOCATION:$PATH"
@@ -23,14 +23,13 @@ setup::tools(){
 
   mkdir -p "$location"
   docker rm -f dubo-tools >/dev/null 2>&1 || true
-  docker create --pull always --name dubo-tools "$IMAGE_TOOLS" bash > /dev/null
+  docker run -d --pull always --name dubo-tools --entrypoint sleep "$IMAGE_TOOLS" inf > /dev/null
   docker cp dubo-tools:/boot/bin/cue "$location"
   docker cp dubo-tools:/boot/bin/buildctl "$location"
-  docker cp dubo-tools:/boot/bin/docker "$location"
   docker rm -f dubo-tools >/dev/null 2>&1
 
   # XXX add hado & shellcheck to the dev image
-  curl --proto '=https' --tlsv1.2 -sSfL -o "$location/hadolint" "https://github.com/hadolint/hadolint/releases/download/v$HADOLINT_VERSION/hadolint-$(uname -s)-$(uname -m)"
+  curl --proto '=https' --tlsv1.2 -sSfL -o "$location/hadolint" "https://github.com/hadolint/hadolint/releases/download/v$HADOLINT_VERSION/hadolint-$(uname -s)-$(uname -m | sed -E 's/aarch64/arm64/')"
   chmod 700 "$location/hadolint"
 
   curl --proto '=https' --tlsv1.2 -sSfL -o shellcheck.tar.xz "https://github.com/koalaman/shellcheck/releases/download/v$SHELLCHECK_VERSION/shellcheck-v$SHELLCHECK_VERSION.$(uname -s | tr '[:upper:]' '[:lower:]').$(uname -m).tar.xz"

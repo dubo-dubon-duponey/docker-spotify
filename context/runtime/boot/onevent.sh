@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -o errexit -o errtrace -o functrace -o nounset -o pipefail
 
+root="$(cd "$(dirname "${BASH_SOURCE[0]:-$PWD}")" 2>/dev/null 1>&2 && pwd)"
+readonly root
+# shellcheck source=/dev/null
+. "$root/helpers.sh"
+# shellcheck source=/dev/null
+. "$root/net.sh"
+
 #username="$(cat /tmp/cache/credentials.json | jq -rc .username)"
 #auth="$(cat /tmp/cache/credentials.json | jq -rc .auth_data | base64 -d)"
 
@@ -8,17 +15,28 @@ get::token(){
   local cid="$1"
   local cse="$2"
   local token
-  curl -fsSL -X "POST" -H "Authorization: Basic $(printf "%s:%s" "$cid" "$cse" | base64 -w 0)" -d grant_type=client_credentials https://accounts.spotify.com/api/token | jq -rc .access_token
+  net::download https://accounts.spotify.com/api/token /dev/stdout no_cache \
+    -X "POST" \
+    -H "Authorization: Basic $(printf "%s:%s" "$cid" "$cse" | base64 -w 0)" \
+    -d grant_type=client_credentials \
+    | jq -rc .access_token
+  # curl -fsSL -X "POST" -H "Authorization: Basic $(printf "%s:%s" "$cid" "$cse" | base64 -w 0)" -d grant_type=client_credentials https://accounts.spotify.com/api/token | jq -rc .access_token
 }
 
 get::url(){
   local token="$1"
   local tid="$2"
-  curl -fsSL \
-    "https://api.spotify.com/v1/tracks/$tid" \
+  net::download https://api.spotify.com/v1/tracks/"$tid" /dev/stdout "" \
     -H "Accept: application/json" \
     -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $token" | jq -rc .album.images[0].url
+    -H "Authorization: Bearer $token" \
+    | jq -rc .album.images[0].url
+
+  #curl -fsSL \
+  #  "https://api.spotify.com/v1/tracks/$tid" \
+  #  -H "Accept: application/json" \
+  #  -H "Content-Type: application/json" \
+  #  -H "Authorization: Bearer $token" | jq -rc .album.images[0].url
 }
 
 display(){
@@ -79,7 +97,8 @@ call(){
     image="$(get::url "$(cat /tmp/token)" "$TRACK_ID")"
   }
 
-  curl -fsSL -o /tmp/framebuffer_album.jpg "$image"
+  net::download "$image" /tmp/framebuffer_album.jpg
+  # curl -fsSL -o /tmp/framebuffer_album.jpg "$image"
   display /tmp/framebuffer_album.jpg
 }
 

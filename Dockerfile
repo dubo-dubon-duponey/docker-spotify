@@ -1,10 +1,10 @@
 ARG           FROM_REGISTRY=docker.io/dubodubonduponey
 
-ARG           FROM_IMAGE_FETCHER=base:golang-bookworm-2024-03-01
-ARG           FROM_IMAGE_BUILDER=base:builder-bookworm-2024-03-01
-ARG           FROM_IMAGE_AUDITOR=base:auditor-bookworm-2024-03-01
-ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2024-03-01
-ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2024-03-01
+ARG           FROM_IMAGE_FETCHER=base:golang-bookworm-2025-05-01
+ARG           FROM_IMAGE_BUILDER=base:builder-bookworm-2025-05-01
+ARG           FROM_IMAGE_AUDITOR=base:auditor-bookworm-2025-05-01
+ARG           FROM_IMAGE_TOOLS=tools:linux-bookworm-2025-05-01
+ARG           FROM_IMAGE_RUNTIME=base:runtime-bookworm-2025-05-01
 
 FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                                                          AS builder-tools
 
@@ -14,8 +14,8 @@ FROM          $FROM_REGISTRY/$FROM_IMAGE_TOOLS                                  
 FROM          --platform=$BUILDPLATFORM $FROM_REGISTRY/$FROM_IMAGE_FETCHER                                              AS fetcher-main
 
 ARG           GIT_REPO=github.com/librespot-org/librespot
-ARG           GIT_VERSION=v0.4.2
-ARG           GIT_COMMIT=22f8aed3fc8c710761c79b3d14dd14c135c46de7
+ARG           GIT_VERSION=v0.6.0
+ARG           GIT_COMMIT=383a6f6969f23b3e3cbc693747101cb9c92463dc
 
 RUN           git clone --recurse-submodules https://"$GIT_REPO" .; git checkout "$GIT_COMMIT"
 
@@ -48,7 +48,10 @@ RUN           --mount=type=secret,uid=100,id=CA \
 
 RUN           mkdir -p /dist/boot/bin/
 
-ENV           RUST_VERSION=1.53.0
+# ENV           RUST_VERSION=1.53.0
+ENV           RUST_VERSION=1.87.0
+# XXX whatever, rust...
+ENV           RUSTUP_USE_CURL=1;
 #RUN           case "$TARGETPLATFORM" in \
 #                "linux/amd64")    arch=x86_64;      abi=gnu;        ga=x86_64;      ;; \
 #                "linux/arm64")    arch=aarch64;     abi=gnu;        ga=aarch64;     ;; \
@@ -59,7 +62,6 @@ ENV           RUST_VERSION=1.53.0
 #              printf "%s\n%s\n" "[target.${arch}-unknown-linux-${abi}]" "linker = \"${ga}-linux-${abi}-gcc\"" >> "$HOME/.cargo/config"; \
 #              PATH="$PATH:$HOME/.cargo/bin" rustup target add "${arch}-unknown-linux-${abi}"
 
-# XXX pin rust to install 1.48.0
 RUN           --mount=type=secret,id=CA \
               --mount=type=secret,id=CERTIFICATE \
               --mount=type=secret,id=KEY \
@@ -82,7 +84,7 @@ RUN           --mount=type=secret,id=CA \
               printf "%s\n%s\n" "[target.$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM]" "linker = \"$DEB_TARGET_GNU_TYPE-gcc\"" >> "$HOME/.cargo/config"; \
               rustup toolchain install "$RUST_VERSION"; \
               rustup target add "$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM"; \
-              cargo build --locked --target="$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM" --release --no-default-features --features "alsa-backend,pulseaudio-backend"; \
+              cargo build --locked --target="$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM" --release --no-default-features --features "alsa-backend pulseaudio-backend with-libmdns"; \
               cp ./target/"$DEB_TARGET_GNU_CPU-unknown-$DEB_TARGET_GNU_SYSTEM"/release/librespot /dist/boot/bin/
 
 #######################
@@ -150,9 +152,11 @@ RUN           chmod 555 /dist/boot/bin/*; \
 #######################
 FROM          $FROM_REGISTRY/$FROM_IMAGE_RUNTIME
 
+COPY          --from=assembly --chown=$BUILD_UID:root /dist /
+
 USER          root
 
-# This should not be necessary and linked statically...
+# Some of this should not be necessary and instead linked statically...
 RUN           --mount=type=secret,uid=100,id=CA \
               --mount=type=secret,uid=100,id=CERTIFICATE \
               --mount=type=secret,uid=100,id=KEY \
@@ -164,7 +168,7 @@ RUN           --mount=type=secret,uid=100,id=CA \
               apt-get install -qq --no-install-recommends \
                 libasound2=1.2.8-1+b1 \
                 libpulse0=16.1+dfsg1-2+b1 \
-                curl=7.88.1-10+deb12u5 \
+                curl=7.88.1-10+deb12u12 \
                 fbi=2.10-4+b1 \
                 jq=1.6-2.1 \
               && apt-get -qq autoremove       \
@@ -173,15 +177,14 @@ RUN           --mount=type=secret,uid=100,id=CA \
               && rm -rf /tmp/*                \
               && rm -rf /var/tmp/*
 
+# librespot still puts a lock file in /tmp
+RUN           rmdir /tmp; ln -s /magnetar/runtime /tmp
+
 USER          dubo-dubon-duponey
 
-# Disable by default as that prevents the zeroconf server to be started by librespot unfortunately...
-ENV           _SERVICE_NICK=""
+ENV           _SERVICE_NICK="spotify"
 ENV           _SERVICE_TYPE="_spotify-connect._tcp"
 
-COPY          --from=assembly --chown=$BUILD_UID:root /dist /
-
-### Generic configuration
 ENV           LOG_LEVEL="warn"
 
 ### Audio module configuration common with other systens
@@ -190,39 +193,61 @@ ENV           MOD_AUDIO_DEVICE=""
 ENV           MOD_AUDIO_OUTPUT=alsa
 # only operative if mixer alsa is selected
 ENV           MOD_AUDIO_MIXER=""
-# no-op for Spotify
+# mono/stereo is a no-op for Spotify
 ENV           MOD_AUDIO_MODE="stereo"
+# default vol, unless volume is ignored
 ENV           MOD_AUDIO_VOLUME_DEFAULT="75"
+# ignore volume entirely
 ENV           MOD_AUDIO_VOLUME_IGNORE=false
+
+# Provisional
+ENV           MOD_MQTT_ENABLED=false
+ENV           MOD_MQTT_HOST=""
+ENV           MOD_MQTT_PORT=""
+ENV           MOD_MQTT_USER=""
+ENV           MOD_MQTT_PASSWORD=""
+ENV           MOD_MQTT_CA=""
+ENV           MOD_MQTT_CERT=""
+ENV           MOD_MQTT_KEY=""
 
 ### Spotify specific configuration hooks
 ENV           SPOTIFY_ENABLE_VOLUME_NORMALIZATION=true
 ENV           SPOTIFY_MIXER=softvol
+ENV           SPOTIFY_CACHE_SIZE=8G
 
+### mDNS broadcasting
+# XXX note this unfortunately does not work with librespot
+# Whether to enable MDNS broadcasting or not
+ENV           MOD_MDNS_ENABLED=false
+# Name is used as a short description for the service
+ENV           MOD_MDNS_NAME="$_SERVICE_NICK mDNS display name"
+# The service will be annonced and reachable at $MOD_MDNS_HOST.local
+ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
+
+### Advanced settings
+# Type to advertise
+ENV           ADVANCED_MOD_MDNS_TYPE="$_SERVICE_TYPE"
+# Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
+ENV           ADVANCED_MOD_MDNS_STATION=false
+
+### Experimental settings
+# Note: this should instead send a message over mqtt
 # Set to true to have librespot display coverart on your RPI framebuffer (/dev/fb0 and /dev/tty1 need to be mounted and CAP added)
 # XXX experimental for now - will be removed in a separate project, and use mqtt publishing instead
 ENV           _EXPERIMENTAL_DISPLAY_ENABLED=false
 ENV           _EXPERIMENTAL_SPOTIFY_CLIENT_ID=""
 ENV           _EXPERIMENTAL_SPOTIFY_CLIENT_SECRET=""
 
-### mDNS broadcasting
-# XXX note this unfortunately does not work with librespot
-# Whether to enable MDNS broadcasting or not
-ENV           MOD_MDNS_ENABLED=false
-# Type to advertise
-ENV           ADVANCED_MOD_MDNS_TYPE="$_SERVICE_TYPE"
-# Name is used as a short description for the service
-ENV           MOD_MDNS_NAME="$_SERVICE_NICK mDNS display name"
-# The service will be annonced and reachable at $MOD_MDNS_HOST.local (set to empty string to disable mDNS announces entirely)
-ENV           MOD_MDNS_HOST="$_SERVICE_NICK"
-# Also announce the service as a workstation (for example for the benefit of coreDNS mDNS)
-ENV           ADVANCED_MOD_MDNS_STATION=true
-
-# Port exposed
 ENV           ADVANCED_PORT=10042
-
-EXPOSE        $ADVANCED_PORT/tcp
-VOLUME        "$XDG_CACHE_HOME"
-
 ENV           HEALTHCHECK_URL="http://127.0.0.1:$ADVANCED_PORT/?action=getInfo"
+
+## Both protocols
+# Obviously 5353 for the mDNS listener
+EXPOSE        5353
+# Spot port
+EXPOSE        $ADVANCED_PORT/tcp
+
+VOLUME        "$XDG_CACHE_HOME"
+VOLUME        "$XDG_RUNTIME_DIR"
+
 HEALTHCHECK   --interval=120s --timeout=30s --start-period=10s --retries=1 CMD http-health || exit 1

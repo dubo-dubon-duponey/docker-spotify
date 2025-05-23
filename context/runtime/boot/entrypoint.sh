@@ -8,12 +8,22 @@ readonly root
 # shellcheck source=/dev/null
 . "$root/mdns.sh"
 
-helpers::dir::writable "$XDG_CACHE_HOME"
+helpers::logger::set "$LOG_LEVEL"
+
+helpers::logger::log INFO "[entrypoint]" "Starting container"
+
+helpers::logger::log DEBUG "[entrypoint]" "Checking directories permissions"
+helpers::dir::writable "$XDG_CACHE_HOME"/spotify create
+helpers::dir::writable "$XDG_RUNTIME_DIR"
+
+helpers::logger::log DEBUG "[entrypoint]" "Preparing configuration"
+
+helpers::logger::log DEBUG "[entrypoint]" "Preparing command"
 
 readonly ADVANCED_PORT="${ADVANCED_PORT:-10042}"
 
 # Basic spot arguments
-args=(--cache-size-limit 8G --cache "$XDG_CACHE_HOME"/spotify --name "${MOD_MDNS_NAME:-Magnetar}" --bitrate 320 --device-type speaker --zeroconf-port "$ADVANCED_PORT")
+args=(--cache-size-limit "${SPOTIFY_CACHE_SIZE:-8G}" --cache "$XDG_CACHE_HOME"/spotify --name "${MOD_MDNS_NAME:-Magnetar}" --bitrate 320 --device-type speaker --zeroconf-port "$ADVANCED_PORT")
 
 # mDNS blast if asked to
 [ "${MOD_MDNS_ENABLED:-}" != true ] || {
@@ -57,17 +67,38 @@ case "$LOG_LEVEL" in
     reg="TRACE|DEBUG|INFO"
   ;;
   "error")
-    reg="TRACE|DEBUG|INFO|WARN"
+    reg="TRACE|DEBUG|INFO|WARN|WARNING"
   ;;
 esac
-reg="^[0-9/: ]*(?:$reg)"
+reg="[[ZT0-9:/. -]*(?:$reg)[ ]*"
 
 args+=("$@")
 
-# TODO control crashes and exponential backoff. Conditions to handle:
-# - failed DNS
-# - failed connection to AP
-# - device busy
+helpers::logger::log DEBUG "[entrypoint]" "Command ready to execute - handing over now:"
+helpers::logger::log INFO "[entrypoint]" "Starting: librespot ${args[*]}"
+
 {
   exec librespot "${args[@]}" 2>&1
-} > >(grep -Pv "$reg" | sed -e 's/^[[0-9:/. ]*/[/' -E -e 's/^(DEBUG|INFO|WARN|ERROR)[ ]*//' | helpers::logger::slurp "$LOG_LEVEL")
+} | while read -r line; do
+  line="$(grep -Pv "$reg" <<<"$line")"
+  [ "$line" ] || continue
+  level="$(sed -Ee 's/^[[ZT:0-9/. -]+(DEBUG|INFO|WARN|WARNING|ERROR).+/\1/' <<<"$line")"
+  line="$(sed -Ee 's/^[[ZT:0-9/. -]+(DEBUG|INFO|WARN|WARNING|ERROR)[ ]*/[/' <<<"$line")"
+  helpers::logger::log "$level" "$line";
+done
+
+# XXX giving up on the wrapped for now - librespot will just keep on crashing if the device is busy
+# librespot will exit for a number of reason - one of them being the device is busy or turned of
+# exiting in such a case is bad
+# - if the container is not restarting, now you have to restart manually whenever the device is free or back online
+# - if the container is restarting "always", then it will restart in fast succession and suck up resources and logs space
+# The wrapper here is meant to alleviate that, by restarting librespot and will only exit with a throttle
+#{
+  # Note: librespot logging is stuffed entirely on stdout by the wrapper - only our logging is on stderr, so, no redirect needed here for the post-processing
+#  exec librespot "${args[@]}" # 2>&1
+#  exec /boot/wrap.sh librespot "${args[@]}" 2>&1 > >(grep -Pv "$reg")
+#} > >(grep -Pv "$reg" | sed -e 's/^[[0-9:/. ]*/[/' -E -e 's/^(DEBUG|INFO|WARN|ERROR)[ ]*//' | helpers::logger::slurp "$LOG_LEVEL")
+
+# > >(sed -Ee 's/^[[ZT:0-9/. -]+/[/' -Ee 's/^[[](DEBUG|INFO|WARN|WARNING|ERROR)[ ]*/[/')
+
+# | helpers::logger::slurp "$LOG_LEVEL")

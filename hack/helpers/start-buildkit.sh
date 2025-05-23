@@ -6,7 +6,7 @@ readonly IMAGE_BLDKT="${IMAGE_BLDKT:-docker.io/dubodubonduponey/buildkit:$TAG}"
 
 setup::buildkit() {
   [ "$(docker container inspect -f '{{.State.Running}}' dbdbdp-buildkit 2>/dev/null)" == "true" ]  || {
-    docker run --pull always --rm -d \
+    docker run --pull always -d \
       -p 4242:4242 \
       --network host \
       --name dbdbdp-buildkit \

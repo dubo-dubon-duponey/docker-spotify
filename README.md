@@ -39,15 +39,15 @@ docker run --rm \
     --net host \
     --cap-drop ALL \
     --read-only \
-    --env "MOD_MDNS_NAME=Display name for your speaker"
-    docker.io/dubodubonduponey/spotify:bookworm-2024-03-01
+    --env "MOD_MDNS_NAME=Display name for your speaker" \
+    docker.io/dubodubonduponey/spotify:bookworm-2025-05-01
 ```
 
 And here is a compose file:
 ```yaml
 spotify:
   # Please pin a specific version, and do NOT use latest, which is prone to breaking changes
-  image: index.docker.io/dubodubonduponey/spotify:bookworm-2024-03-01
+  image: index.docker.io/dubodubonduponey/spotify:bookworm-2025-05-01
   container_name: spotify
   # See below note on networking - host or mac/ip-vlan is required for mDNS to work
   network_mode: host
